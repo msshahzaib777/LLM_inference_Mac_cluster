@@ -4,7 +4,7 @@ from mlx_lm import load, generate
 
 # Load 14B model locally
 print("🔧 [Worker] Loading model...")
-model, tokenizer = load("mlx-community/DeepSeek-Coder-14B-4bit")
+model, tokenizer = load("/Users/student/Documents/LLM_inference/DeepSeek-R1-Distill-Qwen-14B")
 print("✅ [Worker] Model ready.")
 
 # Function exposed over RPC

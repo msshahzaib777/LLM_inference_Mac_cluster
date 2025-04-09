@@ -12,12 +12,11 @@ def main():
     prompt = "Explain how a rocket works in simple terms."
     print(f"🚀 Sending prompt to worker: {prompt}")
 
-    # Call worker's generate function
-    response = rpc.rpc_sync("worker", lambda p: generate_response(p), args=(prompt,))
+    # This calls generate_response() on the remote 'worker'
+    response = rpc.rpc_sync("worker", "generate_response", args=(prompt,))
     print(f"\n🤖 Worker Response:\n{response}\n")
 
     rpc.shutdown()
 
 if __name__ == "__main__":
-    from worker import generate_response  # For local resolution
     main()
