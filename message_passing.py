@@ -1,41 +1,33 @@
 import os
 import argparse
-
 import torch
 import torch.distributed as dist
 
-# Environment variables set by torch.distributed.launch
-LOCAL_RANK = int(os.environ['LOCAL_RANK'])
-WORLD_SIZE = int(os.environ['WORLD_SIZE'])
-WORLD_RANK = int(os.environ['RANK'])
+def run(rank, world_size, backend):
+    print(f"[Rank {rank}] Initializing process on backend: {backend}")
 
+    # Create a tensor to send or receive
+    tensor = torch.tensor([rank], dtype=torch.float32)
 
-def run(backend):
-    tensor = torch.zeros(1)
-
-    # Need to put tensor on a GPU device for nccl backend
-    if backend == 'mps':
-        tensor = tensor.to(backend)
-
-    if WORLD_RANK == 0:
-        for rank_recv in range(1, WORLD_SIZE):
-            dist.send(tensor=tensor, dst=rank_recv)
-            print('worker_{} sent data to Rank {}\n'.format(0, rank_recv))
+    if rank == 0:
+        for r in range(1, world_size):
+            dist.send(tensor=tensor, dst=r)
+            print(f"[Rank 0] Sent data to Rank {r}")
     else:
         dist.recv(tensor=tensor, src=0)
-        print('worker_{} has received data from rank {}\n'.format(WORLD_RANK, 0))
-
+        print(f"[Rank {rank}] Received data from Rank 0: {tensor.item()}")
 
 def init_processes(backend):
-    dist.init_process_group(backend, rank=WORLD_RANK, world_size=WORLD_SIZE)
-    run(backend)
+    # These are set automatically by torchrun
+    rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
 
+    dist.init_process_group(backend=backend, rank=rank, world_size=world_size)
+    run(rank, world_size, backend)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--local_rank", type=int,
-                        help="Local rank. Necessary for using the torch.distributed.launch utility.")
-    parser.add_argument("--backend", type=str, default="mps", choices=['gloo'])
+    parser.add_argument("--backend", type=str, default="gloo", choices=["gloo", "nccl"])
     args = parser.parse_args()
 
-    init_processes(backend=args.backend)
+    init_processes(args.backend)
