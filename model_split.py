@@ -1,51 +1,46 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from mlx_lm import load
 import torch
 
-MODEL_PATH = "DeepSeek-R1-Distill-Qwen-32B"  # update this on each machine
+def load_worker1_model(path):
+    print("🔧 [Worker1] Loading layers 0–15...")
+    model, tokenizer = load(path)
+    model.model.layers = model.model.layers[:16]
+    return model, tokenizer
 
-class DeepSeekPart1:
-    def __init__(self):
-        print("🔧 [Part1] Loading layers 0–15...")
-        self.model = AutoModelForCausalLM.from_pretrained(
-            MODEL_PATH,
-            low_cpu_mem_usage=True,
-            device_map={f"model.layers.{i}": "mps" for i in range(0, 16)},
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-        self.model.eval()
-        print("✅ [Part1] Model ready.")
+def load_worker2_model(path):
+    print("🔧 [Worker2] Loading layers 16–31...")
+    model, tokenizer = load(path)
+    model.model.layers = model.model.layers[16:]
+    return model
 
-    def encode_and_forward(self, text):
-        print(f"[Part1] ✍️ Encoding input: {text}")
-        input_ids = self.tokenizer(text, return_tensors="pt")["input_ids"]
-        input_ids = input_ids.to("mps")
-        with torch.no_grad():
-            hidden = self.model.model.embed_tokens(input_ids)
-            for i in range(16):
-                hidden = self.model.model.layers[i](hidden)[0]
-        print("[Part1] ✅ Finished forward pass for layers 0–15")
-        return hidden.cpu(), input_ids.shape[1], input_ids.cpu()
+def encode(prompt, tokenizer):
+    if hasattr(tokenizer, "apply_chat_template") and tokenizer.chat_template:
+        messages = [{"role": "user", "content": prompt}]
+        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    tokens = tokenizer(prompt, return_tensors="pt")["input_ids"]
+    return tokens
 
+def forward_worker1(model, input_ids):
+    input_ids = input_ids.to("cpu")
+    with torch.no_grad():
+        hidden = model.model.embed_tokens(input_ids)
+        for layer in model.model.layers:
+            hidden = layer(hidden)[0]
+    return hidden.cpu(), input_ids.shape[1]
 
-class DeepSeekPart2:
-    def __init__(self):
-        self.model = AutoModelForCausalLM.from_pretrained(
-            MODEL_PATH,
-            low_cpu_mem_usage=True,
-            device_map={f"model.layers.{i}": "mps" for i in range(16, 32)},
-        )
-        self.model.eval()
+def forward_worker2(model, hidden, input_len):
+    hidden = hidden.to("cpu")
+    with torch.no_grad():
+        for layer in model.model.layers:
+            hidden = layer(hidden)[0]
+        logits = model.lm_head(hidden)
+    return logits[:, input_len - 1:].cpu()
 
-    def forward(self, hidden_states, input_len):
-        hidden_states = hidden_states.to("mps")
-        with torch.no_grad():
-            for i in range(16, 32):
-                hidden_states = self.model.model.layers[i](hidden_states)[0]
-            logits = self.model.lm_head(hidden_states)
-        return logits[:, input_len - 1:].cpu()
+# For controller to call remotely
+def encode_and_forward(prompt):
+    from worker1 import encode_and_forward as worker1_fn
+    return worker1_fn(prompt)
 
-def encode_and_forward_rref(rref, text):
-    return rref.local_value().encode_and_forward(text)
-
-def forward_rref(rref, hidden, input_len):
-    return rref.local_value().forward(hidden, input_len)
+def forward_hidden(hidden, input_len):
+    from worker2 import forward_hidden as worker2_fn
+    return worker2_fn(hidden, input_len)
