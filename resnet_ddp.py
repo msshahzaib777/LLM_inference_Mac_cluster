@@ -50,6 +50,7 @@ def main():
     # Each process runs on 1 GPU device specified by the node_rank argument.
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--node_rank", type=int, help="Local rank. Necessary for using the torch.distributed.launch utility.")
+    parser.add_argument("--backend", type=str, default="gloo", help="Distributed backend to use")
     parser.add_argument("--num_epochs", type=int, help="Number of training epochs.", default=num_epochs_default)
     parser.add_argument("--batch_size", type=int, help="Training batch size for one process.", default=batch_size_default)
     parser.add_argument("--learning_rate", type=float, help="Learning rate.", default=learning_rate_default)
@@ -68,6 +69,7 @@ def main():
     model_filename = argv.model_filename
     resume = argv.resume
 
+    backend = argv.backend
     # Create directories outside the PyTorch program
     # Do not create directory here because it is not multiprocess safe
     '''
