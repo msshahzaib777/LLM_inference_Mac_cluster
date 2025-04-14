@@ -1,0 +1,4 @@
+[
+    {"ssh": "studentone@NikolasacStudio", "ips": ["192.168.2.1"]},
+    {"ssh": "student@cs11572acstudio", "ips": ["192.168.2.2"]}
+]
