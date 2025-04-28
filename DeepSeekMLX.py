@@ -5,7 +5,6 @@ group = mx.distributed.init(backend="ring")
 
 
 model, tokenizer = load("mlx-community/DeepSeek-R1-Distill-Qwen-14B")
-model.to("ring")
 prompt="hello"
 
 if hasattr(tokenizer, "apply_chat_template") and tokenizer.chat_template is not None:
