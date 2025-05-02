@@ -1,11 +1,13 @@
 import torch
 import json
+
+# from accelerate.inference import generate_device_map
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
-from accelerate import init_empty_weights, infer_auto_device_map, dispatch_model, load_checkpoint_and_dispatch
+from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
 from generate_device_map import generate_device_map
 
-checkpoint = "/Users/studentone/Documents/LLM_inference/DeepSeek-R1-Distill-Qwen-32B"
+checkpoint = "/Users/studentone/Documents/mlx_sharding/shard_0"
 
 # Load configuration
 config = AutoConfig.from_pretrained(checkpoint)
@@ -14,10 +16,7 @@ config = AutoConfig.from_pretrained(checkpoint)
 with init_empty_weights():
     model = AutoModelForCausalLM.from_config(config)
 
-# Define device map manually
-device_map = generate_device_map(checkpoint + "/model.safetensors.index.json", 2)
-
-model = load_checkpoint_and_dispatch(model, checkpoint, device_map=device_map)
+model = load_checkpoint_and_dispatch(model, checkpoint, device_map="auto", offload_folder="./offload_folder")
 
 # Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
