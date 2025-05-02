@@ -44,7 +44,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
     for _ in range(max_length):
         hidden = model(input_ids)
-        send_tensor("192.168.2.2", hidden)
+        send_tensor(hidden, "192.168.2.2")
         logits = wait_for_tensor()
         logits_last = logits[:, -1, :]  # get logits for last token
 
