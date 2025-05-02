@@ -2,7 +2,7 @@ import socket
 import numpy as np
 import mlx.core as mx
 
-def wait_for_tensor(port=5001, dtype=np.float32):
+def wait_for_tensor(port=5001):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind(('', port))
         server_socket.listen(1)
@@ -12,14 +12,17 @@ def wait_for_tensor(port=5001, dtype=np.float32):
         with conn:
             print(f"[Receiver] Connected by {addr}")
 
-            # Receive shape line (e.g., "10,10\n")
-            shape_line = b""
-            while not shape_line.endswith(b"\n"):
-                shape_line += conn.recv(1)
-            shape = tuple(map(int, shape_line.decode('utf-8').strip().split(',')))
-            print(f"[Receiver] Expecting tensor of shape {shape}")
+            # Receive header line
+            header_line = b""
+            while not header_line.endswith(b"\n"):
+                header_line += conn.recv(1)
+            parts = header_line.decode('utf-8').strip().split(',')
+            shape = tuple(map(int, parts[:-1]))
+            dtype = np.dtype(parts[-1])
 
-            expected_bytes = np.prod(shape) * np.dtype(dtype).itemsize
+            print(f"[Receiver] Expecting tensor of shape {shape} and dtype {dtype}")
+
+            expected_bytes = np.prod(shape) * dtype.itemsize
 
             # Receive data
             received = b""
@@ -29,9 +32,11 @@ def wait_for_tensor(port=5001, dtype=np.float32):
                     break
                 received += packet
 
+            if len(received) != expected_bytes:
+                raise ValueError(f"Expected {expected_bytes} bytes, but received {len(received)} bytes")
+
             tensor_np = np.frombuffer(received, dtype=dtype).reshape(shape)
             tensor_mx = mx.array(tensor_np)
-            print(f"[Receiver] Received tensor successfully: shape {tensor_mx.shape}")
 
+            print(f"[Receiver] Received tensor successfully: shape {tensor_mx.shape}, dtype {tensor_mx.dtype}")
             return tensor_mx
-
