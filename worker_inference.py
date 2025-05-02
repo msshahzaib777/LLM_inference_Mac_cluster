@@ -54,4 +54,4 @@ if __name__ == "__main__":
     while True:
         hidden = wait_for_tensor()
         logits = model(hidden)
-        send_tensor("192.168.2.1", logits)
+        send_tensor(logits, "192.168.2.1")
