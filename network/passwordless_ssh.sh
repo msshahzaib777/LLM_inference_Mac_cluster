@@ -35,5 +35,5 @@ else
     echo "❌ Passwordless SSH test failed. You may still be prompted for a password."
     exit 1
 fi
-
-# chmod +x setup_passwordless_ssh.sh
+# brew install hudochenkov/sshpass/sshpass
+# chmod +x passwordless_ssh.sh

@@ -1,48 +1,64 @@
 from mpi4py import MPI
 import numpy as np
 import mlx.core as mx
-
+import datetime
+from master_inference import log_debug
 
 def wait_for_tensor(source_rank=0, tag=0):
+    """
+    Receive a tensor (MLX array) from another MPI rank.
+    1. Receive metadata (shape, dtype)
+    2. Receive flattened tensor data
+    3. Reshape and return as MLX array
+    """
     comm = MPI.COMM_WORLD
 
-    # Receive metadata: [shape tuple as list, dtype string]
+    # Receive metadata (shape tuple and dtype string)
     metadata = comm.recv(source=source_rank, tag=tag)
     shape, dtype_str = metadata
     dtype = np.dtype(dtype_str)
 
-    print(f"[Receiver] Expecting tensor of shape {shape} and dtype {dtype}")
+    log_debug(f"[Receiver] Received metadata: shape={shape}, dtype={dtype_str}")
 
     num_elements = np.prod(shape)
 
-    # Prepare empty NumPy array
+    # Allocate empty NumPy array to receive data
     tensor_np = np.empty(num_elements, dtype=dtype)
+    log_debug(f"[Receiver] Allocated empty array for {num_elements} elements")
 
-    # Receive flattened data
+    # Receive the flattened tensor data
     comm.Recv([tensor_np, MPI._typedict[dtype.char]], source=source_rank, tag=tag+1)
+    log_debug(f"[Receiver] Received tensor data from rank {source_rank}")
 
-    # Reshape and convert to MLX tensor
+    # Reshape NumPy array back to original shape
     tensor_np = tensor_np.reshape(shape)
     tensor_mx = mx.array(tensor_np)
 
-    print(f"[Receiver] Received tensor successfully: shape {tensor_mx.shape}, dtype {tensor_mx.dtype}")
+    log_debug(f"[Receiver] Tensor reshaped to {tensor_mx.shape} and converted to MLX array")
+
     return tensor_mx
 
 def send_tensor(tensor_mx, dest_rank=1, tag=0):
+    """
+    Send a tensor (MLX array) to another MPI rank.
+    1. Send metadata (shape, dtype)
+    2. Send flattened tensor data
+    """
     comm = MPI.COMM_WORLD
 
-    tensor_np = np.array(tensor_mx)  # MLX → NumPy
+    # Convert MLX array to NumPy for MPI sending
+    tensor_np = np.array(tensor_mx)
     shape = tensor_np.shape
     dtype_str = tensor_np.dtype.name
     num_elements = np.prod(shape)
 
-    # Send metadata: [shape as list, dtype string]
+    log_debug(f"[Sender] Preparing to send tensor: shape={shape}, dtype={dtype_str}, num_elements={num_elements}")
+
+    # Send metadata first (shape and dtype string)
     metadata = (shape, dtype_str)
     comm.send(metadata, dest=dest_rank, tag=tag)
+    log_debug(f"[Sender] Sent metadata to rank {dest_rank}")
 
-    print(f"[Sender] Sent metadata: shape {shape}, dtype {dtype_str}")
-
-    # Send flattened data
+    # Send the flattened data buffer
     comm.Send([tensor_np.flatten(), MPI._typedict[tensor_np.dtype.char]], dest=dest_rank, tag=tag+1)
-
-    print(f"[Sender] Sent tensor data of {num_elements} elements to rank {dest_rank}")
+    log_debug(f"[Sender] Sent tensor data to rank {dest_rank}")
