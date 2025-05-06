@@ -1,7 +1,17 @@
 import mlx.core as mx
 import numpy as np
 from network.mpi import wait_for_tensor, send_tensor
-from master_inference import log_debug
+import datetime, os
+
+DEBUG_LOG_FILE = os.path.abspath("./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".txt")
+
+
+def log_debug(message):
+    """Append a debug message to the debug log file with timestamp."""
+    with open(DEBUG_LOG_FILE, "a") as f:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        f.write(f"[{timestamp}] {message}\n")
+
 
 def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
     """

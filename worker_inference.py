@@ -1,88 +1,7 @@
-import mlx.core as mx
-import mlx.nn as nn
-from models.qwen2 import Model, ModelArgs
 from network.mpi import send_tensor, wait_for_tensor
-import datetime, os, glob,json
+from utils.utils import log_debug, load_model
 
-DEBUG_LOG_FILE = os.path.abspath("./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".txt")
-
-
-def log_debug(message):
-    """Append a debug message to the debug log file with timestamp."""
-    with open(DEBUG_LOG_FILE, "a") as f:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"[{timestamp}] {message}\n")
-
-def load_model(path_or_hf_repo: str, start_layer: int = None, end_layer: int = None):
-    """
-    Load a model from a specified path, optionally selecting layer range.
-    Includes quantization, weight loading, and evaluation mode.
-    """
-    log_debug(f"Starting to load model from '{path_or_hf_repo}' with layers {start_layer}-{end_layer}")
-    path = path_or_hf_repo
-
-    # Load config.json
-    with open(path + "/config.json", "r") as f:
-        config = json.load(f)
-        log_debug("Loaded config.json")
-
-        if start_layer is not None and end_layer is not None:
-            config['start_layer'] = start_layer
-            config['end_layer'] = end_layer
-            log_debug(f"Updated config with start_layer={start_layer}, end_layer={end_layer}")
-
-    # Find weight files
-    weight_files = glob.glob(str(path + "/*.safetensors"))
-    if not weight_files:
-        error_msg = f"No safetensors found in {path}"
-        log_debug(error_msg)
-        raise FileNotFoundError(error_msg)
-    log_debug(f"Found {len(weight_files)} weight files")
-
-    # Load all weight tensors
-    weights = {}
-    for wf in weight_files:
-        log_debug(f"Loading weights from {wf}")
-        weights.update(mx.load(wf))
-    log_debug(f"Loaded total of {len(weights)} tensors")
-
-    # Initialize model class
-    model_class, model_args_class = Model, ModelArgs
-    model_args = model_args_class.from_dict(config)
-    model = model_class(model_args)
-    log_debug("Initialized model instance")
-
-    # Optionally sanitize weights
-    if hasattr(model, "sanitize"):
-        weights = model.sanitize(weights)
-        log_debug("Sanitized weights")
-
-    # Optionally apply quantization
-    if (quantization := config.get("quantization", None)) is not None:
-        log_debug(f"Applying quantization: {quantization}")
-
-        def class_predicate(p, m):
-            if not hasattr(m, "to_quantized"):
-                return False
-            return f"{p}.scales" in weights
-
-        nn.quantize(
-            model,
-            **quantization,
-            class_predicate=class_predicate,
-        )
-        log_debug("Quantization complete")
-
-    # Load weights into model
-    model.load_weights(list(weights.items()))
-    log_debug("Loaded weights into model")
-
-    model.eval()
-    log_debug("Set model to eval mode")
-
-    return model
-
-if __name__ == "__main__":
+def main():
     log_debug("=== Worker script started ===")
 
     model_path = "./DeepSeek-R1-Distill-Qwen-32B"
@@ -108,3 +27,6 @@ if __name__ == "__main__":
         send_tensor(logits, 0)
 
     log_debug("=== Worker script finished ===")  # (theoretically unreachable here)
+
+if __name__ == "__main__":
+    main()
