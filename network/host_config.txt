@@ -1,2 +1,2 @@
-mac1 slots=1
-mac2 slots=1
+mac1.local slots=1
+mac2.local slots=1

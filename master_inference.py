@@ -1,4 +1,5 @@
 from transformers import AutoTokenizer
+import os
 import glob
 import json
 import mlx.core as mx
@@ -7,7 +8,7 @@ from models.qwen2 import Model, ModelArgs
 from generate import generate
 import datetime
 
-DEBUG_LOG_FILE = "debug_log.txt"
+DEBUG_LOG_FILE = os.path.abspath("./debug_log_rank" + str(os.getpid()) + ".txt")
 
 
 def log_debug(message):
