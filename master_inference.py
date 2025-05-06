@@ -8,7 +8,7 @@ from models.qwen2 import Model, ModelArgs
 from generate import generate
 import datetime
 
-DEBUG_LOG_FILE = os.path.abspath("./debug_log_rank" + str(os.getpid()) + ".txt")
+DEBUG_LOG_FILE = os.path.abspath("./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".txt")
 
 
 def log_debug(message):

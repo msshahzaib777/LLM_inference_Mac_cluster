@@ -2,7 +2,15 @@ from mpi4py import MPI
 import numpy as np
 import mlx.core as mx
 import datetime
-from master_inference import log_debug
+import os
+DEBUG_LOG_FILE = os.path.abspath("./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".txt")
+
+
+def log_debug(message):
+    """Append a debug message to the debug log file with timestamp."""
+    with open(DEBUG_LOG_FILE, "a") as f:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        f.write(f"[{timestamp}] {message}\n")
 
 def wait_for_tensor(source_rank=0, tag=0):
     """

@@ -1,2 +1,2 @@
-mac1.local slots=1
-mac2.local slots=1
+192.168.2.1 slots=1
+192.168.2.2 slots=1
