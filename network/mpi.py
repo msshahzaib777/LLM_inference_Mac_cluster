@@ -4,6 +4,8 @@ import mlx.core as mx
 import datetime
 import os
 
+from utils.utils import numpy_to_mpi_dtype
+
 DEBUG_LOG_FILE = os.path.abspath(
     "./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".txt"
 )
@@ -13,19 +15,6 @@ def log_debug(message):
     with open(DEBUG_LOG_FILE, "a") as f:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"[{timestamp}] {message}\n")
-
-# Explicit mapping: NumPy dtype name → MPI dtype
-numpy_to_mpi_dtype = {
-    'float32': MPI.FLOAT,
-    'float64': MPI.DOUBLE,
-    'int32': MPI.INT,
-    'int64': MPI.LONG,
-    'uint8': MPI.UNSIGNED_CHAR,
-    'int8': MPI.SIGNED_CHAR,
-    'uint16': MPI.UNSIGNED_SHORT,
-    'int16': MPI.SHORT,
-    # Add more types if needed
-}
 
 def wait_for_tensor(source_rank=0, tag=0):
     """

@@ -4,6 +4,7 @@ from generate import generate
 from network.mpi import send_tensor, wait_for_tensor
 from utils.utils import load_model, log_debug
 from worker_inference import main as worker_inference
+
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
@@ -39,7 +40,6 @@ def main():
     log_debug("=== Script finished ===")
 
 if __name__ == "__main__":
-
     if rank == 0:
         main()
     if rank == 1:

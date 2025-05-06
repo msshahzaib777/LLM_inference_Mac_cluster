@@ -2,10 +2,13 @@ import os, datetime, glob, json
 import mlx.core as mx
 import mlx.nn as nn
 from mpi4py import MPI
-
 from models.qwen2 import Model, ModelArgs
 
-DEBUG_LOG_FILE = os.path.abspath("./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".txt")
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+DEBUG_LOG_FILE = os.path.abspath(
+    f"./logs/debug_log_rank{rank}_pid{os.getpid()}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
+)
 
 def log_debug(message):
     """Append a debug message to the debug log file with timestamp."""
@@ -82,6 +85,7 @@ def load_model(path_or_hf_repo: str, start_layer: int = None, end_layer: int = N
     return model
 
 numpy_to_mpi_dtype = {
+    'float16': MPI.COMPLEX16,
     'float32': MPI.FLOAT,
     'float64': MPI.DOUBLE,
     'int32': MPI.INT,
