@@ -4,10 +4,7 @@ import json
 import mlx.core as mx
 import mlx.nn as nn
 from models.qwen2 import Model, ModelArgs
-from generate import generate
-from network.receiver import wait_for_tensor
-from network.sender import send_tensor
-
+from network.mpi import send_tensor, wait_for_tensor
 
 def load_model(path_or_hf_repo: str, start_layer: int = None, end_layer: int = None):
     path = path_or_hf_repo
@@ -52,6 +49,6 @@ if __name__ == "__main__":
     model_path = "./DeepSeek-R1-Distill-Qwen-32B"
     model = load_model(model_path, 36, 64)
     while True:
-        hidden = wait_for_tensor()
+        hidden = wait_for_tensor(0, 0)
         logits = model(hidden)
-        send_tensor(logits, "192.168.2.1")
+        send_tensor(logits, 0)

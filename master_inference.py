@@ -56,5 +56,5 @@ if __name__ == "__main__":
     prompt = "Hello! How are you doing today?"
     # STEP 1: LOAD FIRST HALF
     model = load_model(model_path, 0, 35)
-    response = generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=20)
+    response = generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=200)
     print(response)

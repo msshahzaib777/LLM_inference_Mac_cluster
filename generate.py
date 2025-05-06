@@ -1,8 +1,6 @@
 import mlx.core as mx
 import numpy as np
-
-from network.receiver import wait_for_tensor
-from network.sender import send_tensor
+from network.mpi import wait_for_tensor, send_tensor
 
 
 def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
@@ -44,8 +42,8 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
     for _ in range(max_length):
         hidden = model(input_ids)
-        send_tensor(hidden, "192.168.2.2")
-        logits = wait_for_tensor()
+        send_tensor(hidden, 1)
+        logits = wait_for_tensor(1)
         logits_last = logits[:, -1, :]  # get logits for last token
 
         next_token = sample_next_token(logits_last[0], temperature, top_k, top_p)
@@ -56,6 +54,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
             break
 
     output_ids = np.array(input_ids)[0]
+
     return tokenizer.decode(output_ids, skip_special_tokens=True)
 
 # Example usage:
