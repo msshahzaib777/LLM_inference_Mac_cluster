@@ -18,7 +18,7 @@ def main():
     log_debug("Loaded tokenizer")
 
     messages = [
-        {"role": "system", "content": "You are a helpful AI assistant."}
+        # {"role": "system", "content": "You are a helpful AI assistant."}
     ]
 
     # STEP 1: Load first half of the model (layers 0-35)
@@ -41,7 +41,8 @@ def main():
             token_count += 1
             messages.append({"role": "user", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            response = generate(prompt, model, tokenizer, temperature=0.7, top_k=50, top_p=0.9, max_length=200)
+            prompt = prompt + "</think>"
+            response = generate(prompt, model, tokenizer, max_length=50)
             # logic for token per second calculation
             end_time = time.time()
             elapsed_time = end_time - start_time
