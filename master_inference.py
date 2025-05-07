@@ -41,13 +41,11 @@ def main():
             token_count += 1
             messages.append({"role": "user", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-
-            log_debug("Qwen2.5: ", print_msg=True)
             response = generate(prompt, model, tokenizer)
             # logic for token per second calculation
             end_time = time.time()
             elapsed_time = end_time - start_time
-
+            log_debug("Qwen2.5: " + response, print_msg=True)
             if elapsed_time > 0:
                 tps = token_count / elapsed_time
                 log_debug(f"\n⚡ Tokens per second: {tps:.2f}")
