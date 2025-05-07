@@ -37,7 +37,7 @@ def main():
             messages.append({"role": "user", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             prompt = prompt + "</think>"
-            response = generate(prompt, model, tokenizer, max_length=50)
+            response = generate(prompt, model, tokenizer, max_length=500)
             response = trim_before_last_think(response)
             log_debug("Qwen2.5: " + response, print_msg=True)
             messages.append({"role": "assistant", "content": response})
