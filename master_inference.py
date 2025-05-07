@@ -43,7 +43,7 @@ def main():
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
             log_debug("Qwen2.5: ", print_msg=True)
-            response = generate(prompt, model, tokenizer, temperature=1, top_k=50, top_p=1, max_length=20)
+            response = generate(prompt, model, tokenizer)
             # logic for token per second calculation
             end_time = time.time()
             elapsed_time = end_time - start_time
