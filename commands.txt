@@ -1,3 +1,1 @@
-mpirun --hostfile ./network/host_config.txt -np 1 python master_inference.py : -np 1 python worker_inference.py
-
-to run script on master and worker nodes.
+mpirun --mca btl_tcp_if_include bridge0 -n 2 --hostfile ./network/host_config.txt /Users/studentone/Documents/LLM_inference/DeepSeek/bin/python3.12 master_inference.py

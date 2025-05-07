@@ -11,21 +11,23 @@ def main():
     model = load_model(model_path, 36, 64)
 
     log_debug("Entering inference loop (waiting for incoming tensors)")
-
-    while True:
+    loop = True
+    while loop:
         # Wait for incoming hidden state tensor
         log_debug("Waiting for hidden state tensor from rank 0")
-        hidden = wait_for_tensor(0, 0)
-        log_debug(f"Received hidden tensor: shape={hidden.shape}, dtype={hidden.dtype}")
+        try:
+            hidden = wait_for_tensor(0, 0)
+            log_debug(f"Received hidden tensor: shape={hidden.shape}, dtype={hidden.dtype}")
 
-        # Perform forward pass to get logits
-        logits = model(hidden)
-        log_debug(f"Computed logits: shape={logits.shape}, dtype={logits.dtype}")
+            # Perform forward pass to get logits
+            logits = model(hidden)
+            log_debug(f"Computed logits: shape={logits.shape}, dtype={logits.dtype}")
 
-        # Send logits back to rank 0
-        log_debug("Sending logits tensor back to rank 0")
-        send_tensor(logits, 0)
-
+            # Send logits back to rank 0
+            log_debug("Sending logits tensor back to rank 0")
+            send_tensor(logits, 0)
+        except RuntimeError as e:
+            loop = False
     log_debug("=== Worker script finished ===")  # (theoretically unreachable here)
 
 if __name__ == "__main__":

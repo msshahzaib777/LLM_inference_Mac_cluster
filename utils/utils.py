@@ -7,7 +7,7 @@ from models.qwen2 import Model, ModelArgs
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
-def log_debug(message):
+def log_debug(message, print_msg=False):
 
     """Append a debug message to the debug log file with timestamp."""
     DEBUG_LOG_FILE = os.path.abspath(
@@ -17,6 +17,7 @@ def log_debug(message):
     with open(DEBUG_LOG_FILE, "a") as f:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"[{timestamp}] {message}\n")
+        if print_msg: print(message)
 
 
 
