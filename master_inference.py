@@ -1,3 +1,5 @@
+from termios import FLUSHO
+
 from mpi4py import MPI
 from transformers import AutoTokenizer
 from generate import generate
@@ -37,24 +39,23 @@ def main():
                 break
             start_time = time.time()
             token_count += 1
-            messages.append({"role": "user", "content": user_input})
-            prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            messages.append({"role": "user", "content": user_input + "</think>"})
+            prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
 
             log_debug("Qwen2.5: ", print_msg=True)
             response = ''
             for token in generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=200):
-                log_debug(token, print_msg=True)
+                print(token, end='', flush=True)
                 response += token
+                # logic for token per second calculation
+                end_time = time.time()
+                elapsed_time = end_time - start_time
 
-            # logic for token per second calculation
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-
-            if elapsed_time > 0:
-                tps = token_count / elapsed_time
-                log_debug(f"\n⚡ Tokens per second: {tps:.2f}")
-            else:
-                log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
+                if elapsed_time > 0:
+                    tps = token_count / elapsed_time
+                    log_debug(f"\n⚡ Tokens per second: {tps:.2f}")
+                else:
+                    log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
 
             messages.append({"role": "assistant", "content": response})
 
