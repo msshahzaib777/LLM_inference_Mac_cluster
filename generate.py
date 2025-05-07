@@ -84,8 +84,9 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         # Append sampled token to input_ids
         input_ids = mx.concatenate([input_ids, mx.array([[next_token]])], axis=1)
         log_debug(f"[Generate] Appended next_token={next_token} to input_ids: new shape={input_ids.shape}")
-
-        yield tokenizer.decode(next_token, skip_special_tokens=True)
+        token = tokenizer.decode(next_token, skip_special_tokens=True)
+        log_debug(f"[Generate] Decoded token: '{token}'")
+        yield token
         # Stop if end-of-sequence token is generated
         if next_token == tokenizer.eos_token_id:
             log_debug("[Generate] Stopping generation (EOS token encountered)")

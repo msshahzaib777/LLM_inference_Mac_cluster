@@ -16,8 +16,7 @@ def main():
     log_debug("Loaded tokenizer")
 
     messages = [
-        {"role": "system", "content": "You are a helpful AI assistant."},
-        {"role": "user", "content": "Hello! How are you doing today?"},
+        {"role": "system", "content": "You are a helpful AI assistant."}
     ]
 
     # STEP 1: Load first half of the model (layers 0-35)
@@ -41,10 +40,10 @@ def main():
             messages.append({"role": "user", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
-            print("Qwen2.5: ", end='', flush=True)
+            log_debug("Qwen2.5: ", print_msg=True)
             response = ''
             for token in generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=200):
-                print(token, end='', flush=True)
+                log_debug(token, print_msg=True)
                 response += token
 
             # logic for token per second calculation
