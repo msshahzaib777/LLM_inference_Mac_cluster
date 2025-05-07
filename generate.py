@@ -18,7 +18,6 @@ def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
         mask = np.full_like(logits_np, -np.inf)
         mask[top_k_indices] = logits_np[top_k_indices]
         logits_np = mask
-        log_debug(f"[Sampler] Applied top-k filtering with top_k={top_k}")
 
     # Top-p filtering: keep smallest set of logits whose cumulative probability >= top_p
     if top_p < 1.0:
@@ -34,7 +33,6 @@ def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
             first_cut = np.argmax(cutoff)
             sorted_logits[first_cut + 1:] = -np.inf
             logits_np[sorted_indices] = sorted_logits
-            log_debug(f"[Sampler] Applied top-p filtering with top_p={top_p}")
 
     # Compute final probability distribution
     exp_logits = np.exp(logits_np - np.max(logits_np))
@@ -83,10 +81,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
         # Append sampled token to input_ids
         input_ids = mx.concatenate([input_ids, mx.array([[next_token]])], axis=1)
-        log_debug(f"[Generate] Appended next_token={next_token} to input_ids: new shape={input_ids.shape}")
-        # token = tokenizer.decode([next_token], skip_special_tokens=False)
-        # log_debug(f"[Generate] Decoded token: '{token}'")
-        # yield token
+
         # Stop if end-of-sequence token is generated
         if next_token == tokenizer.eos_token_id:
             log_debug("[Generate] Stopping generation (EOS token encountered)")
