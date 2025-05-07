@@ -1,3 +1,5 @@
+from idlelib.run import flush_stdout
+
 from mpi4py import MPI
 from transformers import AutoTokenizer
 from generate import generate
@@ -30,7 +32,9 @@ def main():
     token_count = 0
     while True:
         try:
-            user_input = input("You: ")
+            log_debug("You: ", print_msg=True)
+            user_input = input()
+            log_debug(user_input)
             if user_input.lower() in ['exit', 'quit']:
                 print("Goodbye!")
                 break
