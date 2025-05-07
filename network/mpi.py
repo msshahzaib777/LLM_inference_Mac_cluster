@@ -6,16 +6,6 @@ import os
 
 from utils.utils import numpy_to_mpi_dtype
 
-DEBUG_LOG_FILE = os.path.abspath(
-    "./logs/debug_log_rank" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".txt"
-)
-
-def log_debug(message):
-    """Append a debug message to the debug log file with timestamp."""
-    with open(DEBUG_LOG_FILE, "a") as f:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"[{timestamp}] {message}\n")
-
 def wait_for_tensor(source_rank=0, tag=0):
     """
     Receive a tensor (MLX array) from another MPI rank.
