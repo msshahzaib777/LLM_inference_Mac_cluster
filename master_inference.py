@@ -5,7 +5,6 @@ from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug
 from worker_inference import main as worker_inference
-import time
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -37,22 +36,12 @@ def main():
             if user_input.lower() in ['exit', 'quit']:
                 print("Goodbye!")
                 break
-            start_time = time.time()
-            token_count += 1
             messages.append({"role": "user", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             prompt = prompt + "</think>"
             response = generate(prompt, model, tokenizer, max_length=50)
-            # logic for token per second calculation
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            log_debug("Qwen2.5: " + response, print_msg=True)
-            if elapsed_time > 0:
-                tps = token_count / elapsed_time
-                log_debug(f"\n⚡ Tokens per second: {tps:.2f}")
-            else:
-                log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
 
+            log_debug("Qwen2.5: " + response, print_msg=True)
             messages.append({"role": "assistant", "content": response})
 
         except (KeyboardInterrupt, EOFError):

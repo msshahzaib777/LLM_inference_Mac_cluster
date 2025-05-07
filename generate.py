@@ -1,3 +1,5 @@
+import time
+
 import mlx.core as mx
 import numpy as np
 from network.mpi import wait_for_tensor, send_tensor
@@ -58,7 +60,9 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
     len_of_input_ids = len(input_ids)
     log_debug(f"[Generate] Encoded input_ids: shape={input_ids.shape}")
     max_length = max_length + len_of_input_ids
+
     for step in range(max_length):
+        start_time = time.time()
         log_debug(f"[Generate] Step {step + 1}/{max_length}")
 
         # Forward pass to get hidden state for first partition
@@ -87,6 +91,14 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         if next_token == tokenizer.eos_token_id:
             log_debug("[Generate] Stopping generation (EOS token encountered)")
             break
+    # logic for token per second calculation
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    if elapsed_time > 0:
+        tps = len(input_ids) / elapsed_time
+        log_debug(f"\n⚡ Tokens per second: {tps:.2f}")
+    else:
+        log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
 
     # # Convert generated tokens to output string
     output_ids = np.array(input_ids)[0]
