@@ -3,12 +3,18 @@ from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug
 from worker_inference import main as worker_inference
-from prompt_toolkit import PromptSession
 import time
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
+if rank == 0:
+    from prompt_toolkit import PromptSession
+    from prompt_toolkit.output.defaults import create_output
+
+    output = create_output()
+    output.supports_cursor_position = False
+
 
 def main():
     log_debug("=== Master Script started ===")
@@ -17,6 +23,8 @@ def main():
     log_debug("Loaded tokenizer")
 
     session = PromptSession()
+    session.app.output.supports_cursor_position = False
+
     log_debug("=== Chatbot started (type 'exit' to quit) ===", print_msg=True)
     messages = [
         {"role": "system", "content": "You are a helpful AI assistant."},
