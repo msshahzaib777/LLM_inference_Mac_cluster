@@ -11,7 +11,7 @@ def log_debug(message):
 
     """Append a debug message to the debug log file with timestamp."""
     DEBUG_LOG_FILE = os.path.abspath(
-        f"./logs/debug_log_rank{rank}_pid{os.getpid()}_{datetime.datetime.now().strftime('%Y-%m-%d')}.txt"
+        f"./logs/debug_log_rank{rank}.txt"
     )
 
     with open(DEBUG_LOG_FILE, "a") as f:
