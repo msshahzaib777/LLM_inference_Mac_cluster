@@ -1,10 +1,8 @@
 from mpi4py import MPI
 import numpy as np
 import mlx.core as mx
-import datetime
-import os
+from utils.utils import numpy_to_mpi_dtype, log_debug
 
-from utils.utils import numpy_to_mpi_dtype
 
 def wait_for_tensor(source_rank=0, tag=0):
     """
