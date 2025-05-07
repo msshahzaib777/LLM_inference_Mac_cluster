@@ -31,11 +31,12 @@ def main():
     model = load_model(model_path, 0, 35)
 
     # STEP 2: Generate response
-    log_debug("Generating response...")
-    response = generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=200)
+    log_debug("Generating response (streaming)...")
 
-    log_debug(f"Generated response: '{response}'")
-    print(response)
+    for token in generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=10):
+        print(token, end='', flush=True)  # 🔥 streaming print
+
+    log_debug("Finished generating response.")
 
     log_debug("=== Script finished ===")
 

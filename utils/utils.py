@@ -6,12 +6,14 @@ from models.qwen2 import Model, ModelArgs
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
-DEBUG_LOG_FILE = os.path.abspath(
-    f"./logs/debug_log_rank{rank}_pid{os.getpid()}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
-)
 
 def log_debug(message):
+
     """Append a debug message to the debug log file with timestamp."""
+    DEBUG_LOG_FILE = os.path.abspath(
+        f"./logs/debug_log_rank{rank}_pid{os.getpid()}_{datetime.datetime.now().strftime('%Y-%m-%d')}.txt"
+    )
+
     with open(DEBUG_LOG_FILE, "a") as f:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"[{timestamp}] {message}\n")
