@@ -102,7 +102,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
     # # Convert generated tokens to output string
     output_ids = np.array(input_ids)[0]
-    decoded_output = tokenizer.decode(output_ids[len_of_input_ids:], skip_special_tokens=True)
+    decoded_output = tokenizer.decode(output_ids, skip_special_tokens=True)
     log_debug(f"[Generate] Decoded output: '{decoded_output}'")
 
     return decoded_output

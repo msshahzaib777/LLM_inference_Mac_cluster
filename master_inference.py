@@ -1,9 +1,7 @@
-from termios import FLUSHO
-
 from mpi4py import MPI
 from transformers import AutoTokenizer
 from generate import generate
-from utils.utils import load_model, log_debug
+from utils.utils import load_model, log_debug, trim_before_last_think
 from worker_inference import main as worker_inference
 
 comm = MPI.COMM_WORLD
@@ -40,7 +38,7 @@ def main():
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             prompt = prompt + "</think>"
             response = generate(prompt, model, tokenizer, max_length=50)
-
+            response = trim_before_last_think(response)
             log_debug("Qwen2.5: " + response, print_msg=True)
             messages.append({"role": "assistant", "content": response})
 

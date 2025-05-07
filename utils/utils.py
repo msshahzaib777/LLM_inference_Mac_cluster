@@ -87,6 +87,16 @@ def load_model(path_or_hf_repo: str, start_layer: int = None, end_layer: int = N
 
     return model
 
+def trim_before_last_think(response):
+    tag = "</think>"
+    last_index = response.rfind(tag)
+    if last_index != -1:
+        # Keep everything after the last </think>
+        return response[last_index + len(tag):].strip()
+    else:
+        # If no </think> tag found, return full response
+        return response.strip()
+
 numpy_to_mpi_dtype = {
     'float16': MPI.COMPLEX16,
     'float32': MPI.FLOAT,
