@@ -8,13 +8,6 @@ import time
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
-if rank == 0:
-    from prompt_toolkit import PromptSession
-    from prompt_toolkit.output.defaults import create_output
-
-    output = create_output()
-    output.supports_cursor_position = False
-
 
 def main():
     log_debug("=== Master Script started ===")
@@ -22,10 +15,6 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     log_debug("Loaded tokenizer")
 
-    session = PromptSession()
-    session.app.output.supports_cursor_position = False
-
-    log_debug("=== Chatbot started (type 'exit' to quit) ===", print_msg=True)
     messages = [
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": "Hello! How are you doing today?"},
@@ -34,13 +23,14 @@ def main():
     # STEP 1: Load first half of the model (layers 0-35)
     log_debug("Loading first half of the model (layers 0-35)")
     model = load_model(model_path, 0, 35)
+    log_debug("=== Chatbot started (type 'exit' to quit) ===", print_msg=True)
 
-    # STEP 2: Generate response
+    # STEP 2: Take input and Generate response
     log_debug("Generating response (streaming)...")
     token_count = 0
     while True:
         try:
-            user_input = session.prompt("You: ")
+            user_input = input("You: ")
             if user_input.lower() in ['exit', 'quit']:
                 print("Goodbye!")
                 break
@@ -54,6 +44,7 @@ def main():
             for token in generate(prompt, model, tokenizer, temperature=0.6, top_k=10, top_p=0.85, max_length=200):
                 print(token, end='', flush=True)
                 response += token
+
             # logic for token per second calculation
             end_time = time.time()
             elapsed_time = end_time - start_time
