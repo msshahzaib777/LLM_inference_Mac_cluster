@@ -34,7 +34,6 @@ class Config:
         world = mx.distributed.init()
         self.rank = world.rank()
         self.size = world.size()
-        print(f"[Config] Rank: {self.rank} / Size: {self.size}")
 
     def _load_model_shapes(self, model_path):
         """Read model config.json and populate tensor shapes in memory."""

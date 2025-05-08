@@ -13,8 +13,9 @@ class MLXBackend(NetworkInterface):
         template_tensor = config.get_tensor_template(tensor_name)
         if template_tensor is None:
             raise ValueError(f"Template tensor for '{tensor_name}' not found in config")
-
-        return mx.distributed.recv(template_tensor.shape, template_tensor.dtype, src=source_rank)
+        tensor = mx.distributed.recv_like (template_tensor, src=source_rank)
+        log_debug(f"[Receiver] Received tensor '{tensor}'")
+        return tensor
 
     def send_tensor(self, tensor, dest_rank=1, tag=0, **kwargs):
         log_debug(f"[Sender] Sending tensor to rank {dest_rank}")
