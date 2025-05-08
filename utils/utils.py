@@ -97,14 +97,12 @@ def trim_before_last_think(response):
         # If no </think> tag found, return full response
         return response.strip()
 
-numpy_to_mpi_dtype = {
-    'float16': MPI.COMPLEX16,
-    'float32': MPI.FLOAT,
-    'float64': MPI.DOUBLE,
-    'int32': MPI.INT,
-    'int64': MPI.LONG,
-    'uint8': MPI.UNSIGNED_CHAR,
-    'int8': MPI.SIGNED_CHAR,
-    'uint16': MPI.UNSIGNED_SHORT,
-    'int16': MPI.SHORT,
+# Define once at the top of the file
+mlx_dtype_map = {
+    'bfloat16': mx.bfloat16,
+    'float16': mx.float16,
+    'float32': mx.float32,
+    'float64': mx.float64,
+    'int32': mx.int32,
+    'int64': mx.int64,
 }
