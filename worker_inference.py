@@ -1,4 +1,4 @@
-from network.tcp import send_tensor, wait_for_tensor
+from network.mpi import send_tensor, wait_for_tensor
 from utils.utils import log_debug, load_model
 
 def main():
