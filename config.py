@@ -67,6 +67,7 @@ class Config:
             'shape': [1, max_seq_length, vocab_size],
             'dtype': dtype_logits
         })
+        self.config.setdefault('tensor_shapes', tensor_shapes)
 
     def get(self, key, default=None):
         """Generic getter for config values."""
