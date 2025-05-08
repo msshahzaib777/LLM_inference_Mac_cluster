@@ -87,9 +87,10 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
         # Sample next token from logits
         next_token = sample_next_token(logits_last[0], temperature, top_k, top_p)
-        log_debug(f"[Generate] Next token: {tokenizer.decode(next_token)}")
+
         # Append sampled token to input_ids
         input_ids = mx.concatenate([input_ids, mx.array([[next_token]])], axis=1)
+        log_debug(f"[Generate] Generated reply: {tokenizer.decode(np.array(input_ids)[0])}")
 
         # Stop if end-of-sequence token is generated
         if next_token == tokenizer.eos_token_id:
