@@ -5,8 +5,3 @@ mpi:
   num_ranks: 2
 tcp:
   port: 12345
-tensor_shapes:
-  hidden_state:
-    dtype: float16  # this will override the default in config.py
-  logits:
-    dtype: float16  # this will override the default in config.py

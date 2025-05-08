@@ -25,7 +25,6 @@ class Config:
         model_path = self.config.get('model_path')
         if model_path:
             print(f"model_path: {model_path}")
-            self._load_model_shapes(model_path)
 
         # Initialize distributed rank and size
         self._init_distributed()
@@ -34,38 +33,6 @@ class Config:
         world = mx.distributed.init()
         self.rank = world.rank()
         self.size = world.size()
-
-    def _load_model_shapes(self, model_path):
-        """Read model config.json and populate tensor shapes in memory."""
-        config_json = os.path.join(model_path, 'config.json')
-        if not os.path.exists(config_json):
-            raise FileNotFoundError(f"Model config.json not found at {config_json}")
-
-        with open(config_json, 'r') as f:
-            model_cfg = json.load(f)
-
-        hidden_size = model_cfg.get('hidden_size')
-        vocab_size = model_cfg.get('vocab_size')
-        max_seq_length = model_cfg.get('max_position_embeddings', 512)
-
-        if not (hidden_size and vocab_size):
-            raise ValueError("Model config must contain 'hidden_size' and 'vocab_size'.")
-
-        # Read dtype from config.yaml → fallback to float32
-        tensor_shapes_cfg = self.config.get('tensor_shapes', {})
-        dtype_hidden = tensor_shapes_cfg.get('hidden_state', {}).get('dtype', 'float32')
-        dtype_logits = tensor_shapes_cfg.get('logits', {}).get('dtype', 'float32')
-
-        # Overwrite full shape + dtype
-        tensor_shapes = self.config.setdefault('tensor_shapes', {})
-        tensor_shapes['hidden_state'] = {
-            'shape': [1, max_seq_length, hidden_size],
-            'dtype': dtype_hidden
-        }
-        tensor_shapes['logits'] = {
-            'shape': [1, max_seq_length, vocab_size],
-            'dtype': dtype_logits
-        }
 
     def get(self, key, default=None):
         """Generic getter for config values."""
