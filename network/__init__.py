@@ -1,6 +1,6 @@
 import os
 
-backend = os.getenv('NETWORK_BACKEND', 'mpi').lower()
+backend = os.getenv('NETWORK_BACKEND').lower()
 
 if backend == 'mpi':
     from .mpi import MPIBackend as Backend
