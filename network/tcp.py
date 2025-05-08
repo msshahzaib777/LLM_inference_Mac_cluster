@@ -3,6 +3,8 @@ import numpy as np
 import mlx.core as mx
 import json, os
 
+from utils.utils import log_debug
+
 # Path to your JSON file
 file_path = 'network/nodes.json'
 
@@ -49,7 +51,7 @@ def wait_for_tensor(machine, tag=0, port=5001):
             tensor_np = np.frombuffer(received, dtype=dtype).reshape(shape)
             tensor_mx = mx.array(tensor_np)
 
-            print(f"[Receiver] Received tensor successfully: shape {tensor_mx.shape}, dtype {tensor_mx.dtype}")
+            log_debug(f"[Receiver] Received tensor successfully: shape {tensor_mx.shape}, dtype {tensor_mx.dtype}")
             return tensor_mx
 
 def send_tensor(tensor_mx, node_id, port=5001):
@@ -68,4 +70,4 @@ def send_tensor(tensor_mx, node_id, port=5001):
         # Send data
         client_socket.sendall(tensor_bytes)
 
-        print(f"[Sender] Sent tensor of shape {shape} and dtype {dtype_name} to {nodes[node_id]}:{port}")
+        log_debug(f"[Sender] Sent tensor of shape {shape} and dtype {dtype_name} to {nodes[node_id]}:{port}")
