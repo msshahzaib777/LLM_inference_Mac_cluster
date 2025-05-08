@@ -1,1 +1,4 @@
 mpirun --mca btl_tcp_if_include bridge0 -n 2 --hostfile ./network/host_config.txt /Users/studentone/Documents/LLM_inference/DeepSeek/bin/python3.12 master_inference.py
+
+with mlx
+mlx.launch --backend mpi -n 2 --hostfile ./network/host_config.txt master_inference.py
