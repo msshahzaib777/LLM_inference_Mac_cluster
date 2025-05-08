@@ -24,7 +24,9 @@ class Config:
 
         model_path = self.config.get('model_path')
         if model_path:
+            print(f"model_path: {model_path}")
             self._load_model_shapes(model_path)
+            print("model shapes loaded")
 
         # Initialize distributed rank and size
         self._init_distributed()
