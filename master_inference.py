@@ -30,13 +30,13 @@ def main():
             if user_input.lower() in ['exit', 'quit']:
                 print("Goodbye!")
                 break
-
+            messages.append({"role": "User", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             # prompt = user_input
             response = generate(prompt, model, tokenizer, max_length=500)
             response = trim_before_last_think(response)
             log_debug("Qwen2.5: " + response, print_msg=True)
-            messages.append({"role": "assistant", "content": response})
+            messages.append({"role": "Assistant", "content": response})
 
         except (KeyboardInterrupt, EOFError):
             print("\nGoodbye!")
