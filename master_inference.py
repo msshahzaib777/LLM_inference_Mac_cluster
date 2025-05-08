@@ -9,7 +9,7 @@ from config import config
 # Initialize the distributed environment
 
 import mlx.core as mx
-world = mx.distributed.init()
+world = mx.distributed.init(backend="mpi")
 rank = world.rank()
 size = world.size()
 print(f"[INFO] Rank: {rank} / Size: {size} / Hostname: {os.uname().nodename}")
