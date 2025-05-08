@@ -13,7 +13,7 @@ file_path = os.path.abspath(file_path)
 with open(file_path, 'r') as file:
     nodes = json.load(file)
 
-def wait_for_tensor(port=5001):
+def wait_for_tensor(machine, tag=0, port=5001):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind(('', port))
         server_socket.listen(1)
