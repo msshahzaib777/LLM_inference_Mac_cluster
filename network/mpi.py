@@ -70,5 +70,6 @@ def send_tensor(tensor_mx, dest_rank=1, tag=0):
     log_debug(f"[Sender] Sent metadata to rank {dest_rank}")
 
     # Send the flattened data buffer
-    comm.Send([tensor_np.flatten(), mpi_dtype], dest=dest_rank, tag=tag+1)
+    tensor_flat = tensor_np.flatten()
+    comm.Send([tensor_flat, mpi_dtype], dest=dest_rank, tag=tag+1)
     log_debug(f"[Sender] Sent tensor data to rank {dest_rank}")
