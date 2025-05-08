@@ -6,8 +6,14 @@ from .interface import NetworkInterface
 class MLXBackend(NetworkInterface):
     def wait_for_tensor(self, source_rank=0, **kwargs):
         tensor_name = kwargs.get('tensor_name')
+        if tensor_name is None:
+            raise ValueError("Missing required 'tensor_name' argument")
+
         log_debug(f"[Receiver] Receiving tensor '{tensor_name}' from rank {source_rank}")
         template_tensor = config.get_tensor_template(tensor_name)
+        if template_tensor is None:
+            raise ValueError(f"Template tensor for '{tensor_name}' not found in config")
+
         return mx.distributed.recv(template_tensor.shape, template_tensor.dtype, src=source_rank)
 
     def send_tensor(self, tensor, dest_rank=1, tag=0, **kwargs):
