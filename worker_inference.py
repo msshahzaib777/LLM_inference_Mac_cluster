@@ -18,7 +18,7 @@ def main():
         # Wait for incoming hidden state tensor
         log_debug("Waiting for hidden state tensor from rank 0")
         try:
-            hidden = network.wait_for_tensor(0, tensor_name='hidden_state')
+            hidden = network.wait_for_tensor(0)
             log_debug(f"Received hidden tensor: shape={hidden.shape}, dtype={hidden.dtype}")
 
             # Perform forward pass to get logits

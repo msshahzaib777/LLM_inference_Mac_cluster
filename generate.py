@@ -75,7 +75,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         log_debug(f"[Generate] Sent hidden state to rank 1")
 
         # Receive logits back from rank 1 (use template to know shape/dtype)
-        logits = network.wait_for_tensor(1, tensor_name='logits')
+        logits = network.wait_for_tensor(1)
         half_pass_time = time.time() - half_pass_start_time
         half_pass_time_list.append(half_pass_time)
         log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape} in {half_pass_time} seconds")

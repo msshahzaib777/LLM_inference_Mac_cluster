@@ -1,3 +1,5 @@
+import time
+
 from config import config
 import mlx.core as mx
 from utils.utils import log_debug
@@ -6,7 +8,7 @@ from .interface import NetworkInterface
 class MLXBackend(NetworkInterface):
     def wait_for_tensor(self, source_rank=0, **kwargs):
         log_debug(f"[Receiver] Receiving tensor from rank {source_rank}")
-
+        time.sleep(50)
         # Step 1: receive dtype string length and string
         dtype_len_array = mx.distributed.recv((1,), mx.int64, src=source_rank)
         dtype_len = int(dtype_len_array[0].item())
