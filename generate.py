@@ -2,7 +2,7 @@ import time
 
 import mlx.core as mx
 import numpy as np
-from network.mpi import wait_for_tensor, send_tensor
+from network.tcp import wait_for_tensor, send_tensor
 from utils.utils import log_debug
 
 def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):

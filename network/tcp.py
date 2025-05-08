@@ -2,6 +2,15 @@ import socket
 import numpy as np
 import mlx.core as mx
 
+import json
+
+# Path to your JSON file
+file_path = './nodes.json'
+
+# Open and read the JSON file
+with open(file_path, 'r') as file:
+    nodes = json.load(file)
+
 def wait_for_tensor(port=5001):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind(('', port))
@@ -41,14 +50,14 @@ def wait_for_tensor(port=5001):
             print(f"[Receiver] Received tensor successfully: shape {tensor_mx.shape}, dtype {tensor_mx.dtype}")
             return tensor_mx
 
-def send_tensor(tensor_mx, server_ip, port=5001):
+def send_tensor(tensor_mx, node_id, port=5001):
     tensor_np = np.array(tensor_mx)  # MLX tensor → NumPy
     tensor_bytes = tensor_np.tobytes()
     shape = tensor_np.shape
     dtype_name = tensor_np.dtype.name  # e.g., 'float32', 'int64'
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-        client_socket.connect((server_ip, port))
+        client_socket.connect((nodes[node_id], port))
 
         # Send header: shape + dtype, separated by commas, ending with newline
         header = f"{','.join(map(str, shape))},{dtype_name}\n"
