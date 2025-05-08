@@ -1,3 +1,5 @@
+import os
+
 from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug, trim_before_last_think
@@ -10,6 +12,7 @@ import mlx.core as mx
 world = mx.distributed.init()
 rank = world.rank()
 size = world.size()
+print(f"[INFO] Rank: {rank} / Size: {size} / Hostname: {os.uname().nodename}")
 
 
 def main():
