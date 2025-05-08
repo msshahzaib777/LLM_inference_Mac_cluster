@@ -62,15 +62,12 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
     max_length = max_length + len_of_input_ids
     token_time_list = []
     half_pass_time_list = []
-    # Initialize KV cache
-    past_key_values = None
-
     for step in range(max_length):
         start_time = time.time()
         log_debug(f"[Generate] Step {step + 1}/{max_length}")
 
         # Forward pass to get hidden state for first partition
-        hidden, past_key_values = model(input_ids, past_key_values=past_key_values)
+        hidden = model(input_ids)
         log_debug(f"[Generate] Computed hidden state: shape={hidden.shape}")
 
         # Send hidden state to worker (rank 1)
