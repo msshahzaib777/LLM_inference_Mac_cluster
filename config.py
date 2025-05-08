@@ -26,7 +26,6 @@ class Config:
         if model_path:
             print(f"model_path: {model_path}")
             self._load_model_shapes(model_path)
-            print("model shapes loaded")
 
         # Initialize distributed rank and size
         self._init_distributed()
@@ -58,20 +57,16 @@ class Config:
         dtype_hidden = tensor_shapes_cfg.get('hidden_state', {}).get('dtype', 'float32')
         dtype_logits = tensor_shapes_cfg.get('logits', {}).get('dtype', 'float32')
 
+        # Overwrite full shape + dtype
         tensor_shapes = self.config.setdefault('tensor_shapes', {})
-
-        tensor_shapes.setdefault('hidden_state', {
+        tensor_shapes['hidden_state'] = {
             'shape': [1, max_seq_length, hidden_size],
             'dtype': dtype_hidden
-        })
-
-        tensor_shapes.setdefault('logits', {
+        }
+        tensor_shapes['logits'] = {
             'shape': [1, max_seq_length, vocab_size],
             'dtype': dtype_logits
-        })
-        print(json.dumps(tensor_shapes, indent=4))
-        self.config.setdefault('tensor_shapes', tensor_shapes)
-        print(json.dumps(self.config, indent=4))
+        }
 
     def get(self, key, default=None):
         """Generic getter for config values."""
