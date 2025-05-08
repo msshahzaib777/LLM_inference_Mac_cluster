@@ -1,10 +1,10 @@
 [
     {
-        "ssh": "mac1",
+        "ssh": "NikolasacStudio",
         "ips": ["192.168.2.1"]
     },
     {
-        "ssh": "mac2",
+        "ssh": "cs11572acstudio",
         "ips": ["192.168.2.2"]
     }
 ]
