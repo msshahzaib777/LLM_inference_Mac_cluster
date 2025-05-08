@@ -1,6 +1,8 @@
 import time
 import mlx.core as mx
 import numpy as np
+
+from config import config as cfg
 from network import network
 from utils.utils import log_debug
 
@@ -71,6 +73,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
         # Send hidden state to worker (rank 1)
         half_pass_start_time = time.time()
+        cfg.world.barrier()
         network.send_tensor(hidden, 1)
         log_debug(f"[Generate] Sent hidden state to rank 1")
 
