@@ -57,7 +57,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
     log_debug(f"[Generate] Starting generation for prompt: '{prompt}'")
 
     input_ids = tokenizer.encode(prompt, return_tensors="mlx")
-    len_of_input_ids = len(input_ids)
+    len_of_input_ids = len(input_ids[0])
     log_debug(f"[Generate] Encoded input_ids: shape={input_ids.shape}")
     max_length = max_length + len_of_input_ids
 
@@ -70,12 +70,14 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         log_debug(f"[Generate] Computed hidden state: shape={hidden.shape}")
 
         # Send hidden state to worker (rank 1)
+        half_pass_start_time = time.time()
         send_tensor(hidden, 1)
         log_debug(f"[Generate] Sent hidden state to rank 1")
 
         # Wait for logits back from worker
         logits = wait_for_tensor(1)
-        log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape}")
+        half_pass_time = time.time() - half_pass_start_time
+        log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape} in {half_pass_time} seconds")
 
         # Get logits for last token
         logits_last = logits[:, -1, :]
@@ -91,14 +93,12 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         if next_token == tokenizer.eos_token_id:
             log_debug("[Generate] Stopping generation (EOS token encountered)")
             break
-    # logic for token per second calculation
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    if elapsed_time > 0:
-        tps = len(input_ids) / elapsed_time
-        log_debug(f"\n⚡ Tokens per second: {tps:.2f}")
-    else:
-        log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
+        # logic for token per second calculation
+        elapsed_time = time.time() - start_time
+        if elapsed_time > 0:
+            log_debug(f"\n⚡ Tokens per second: {elapsed_time:.2f}")
+        else:
+            log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
 
     # # Convert generated tokens to output string
     output_ids = np.array(input_ids)[0]
