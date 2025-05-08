@@ -15,8 +15,8 @@ def main():
     log_debug("Loaded tokenizer")
 
     messages = [
-        {"role": "system",
-         "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}
+        # {"role": "system",
+        #  "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}
     ]
 
     # STEP 1: Load first half of the model (layers 0-35)
@@ -26,7 +26,6 @@ def main():
 
     # STEP 2: Take input and Generate response
     log_debug("Generating response (streaming)...")
-    token_count = 0
     while True:
         try:
             log_debug("\nYou: ", print_msg=True)
