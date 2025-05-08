@@ -1,28 +1,21 @@
 import mlx.core as mx
 
-# Initialize MLX distributed
 group = mx.distributed.init()
 rank = group.rank()
 size = group.size()
 
-print(f"[Rank {rank}] Hello from rank {rank} of {size}")
-
-# Synchronize all ranks
-mx.distributed.barrier()
-print(f"[Rank {rank}] Passed barrier")
+print(f"[Rank {rank}] Hello from rank {rank} of {size}", flush=True)
 
 if rank == 0:
-    # Sender: create and send tensor
     tensor = mx.array([[1.0, 2.0], [3.0, 4.0]], dtype=mx.float32)
-    print(f"[Rank {rank}] Sending tensor:\n{tensor}")
+    print(f"[Rank {rank}] Sending tensor:\n{tensor}", flush=True)
     mx.distributed.send(tensor, dst=1)
+    print(f"[Rank {rank}] Send complete", flush=True)
 
 elif rank == 1:
-    # Receiver: create template tensor and receive into it
     template = mx.zeros((2, 2), dtype=mx.float32)
+    print(f"[Rank {rank}] Waiting to receive tensor...", flush=True)
     received_tensor = mx.distributed.recv_like(template, src=0)
-    print(f"[Rank {rank}] Received tensor using recv_like:\n{received_tensor}")
+    print(f"[Rank {rank}] Received tensor:\n{received_tensor}", flush=True)
 
-# Final barrier to cleanly finish
-mx.distributed.barrier()
-print(f"[Rank {rank}] Done.")
+print(f"[Rank {rank}] Done.", flush=True)
