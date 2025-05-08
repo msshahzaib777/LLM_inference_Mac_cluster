@@ -1,10 +1,18 @@
-from network.mpi import send_tensor, wait_for_tensor
+from config import config
+from network import network
 from utils.utils import log_debug, load_model
+import mlx.core as mx
+
+# Initialize the distributed environment
+world = mx.distributed.init()
+rank = world.rank()
+size = world.size()
+
 
 def main():
     log_debug("=== Worker script started ===")
 
-    model_path = "./DeepSeek-R1-Distill-Qwen-32B"
+    model_path = config.get('model_path')
 
     # Load second half of the model (layers 36-64)
     log_debug("Loading second half of the model (layers 36-64)")
@@ -16,7 +24,7 @@ def main():
         # Wait for incoming hidden state tensor
         log_debug("Waiting for hidden state tensor from rank 0")
         try:
-            hidden = wait_for_tensor(0, 0)
+            hidden = network.wait_for_tensor(0, tensor_name='hidden_state')
             log_debug(f"Received hidden tensor: shape={hidden.shape}, dtype={hidden.dtype}")
 
             # Perform forward pass to get logits
@@ -25,7 +33,7 @@ def main():
 
             # Send logits back to rank 0
             log_debug("Sending logits tensor back to rank 0")
-            send_tensor(logits, 0)
+            network.send_tensor(logits, 0)
         except RuntimeError as e:
             loop = False
     log_debug("=== Worker script finished ===")  # (theoretically unreachable here)

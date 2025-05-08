@@ -1,16 +1,19 @@
-from mpi4py import MPI
 from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug, trim_before_last_think
 from worker_inference import main as worker_inference
+from config import config
+import mlx.core as mx
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
+# Initialize the distributed environment
+world = mx.distributed.init()
+rank = world.rank()
+size = world.size()
+
 
 def main():
     log_debug("=== Master Script started ===")
-    model_path = "./DeepSeek-R1-Distill-Qwen-32B"
+    model_path = config.get("model_path")
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     log_debug("Loaded tokenizer")
 

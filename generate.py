@@ -1,8 +1,7 @@
 import time
-
 import mlx.core as mx
 import numpy as np
-from network.mpi import wait_for_tensor, send_tensor
+from network import network
 from utils.utils import log_debug
 
 def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
@@ -72,11 +71,11 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
         # Send hidden state to worker (rank 1)
         half_pass_start_time = time.time()
-        send_tensor(hidden, 1)
+        network.send_tensor(hidden, 1)
         log_debug(f"[Generate] Sent hidden state to rank 1")
 
-        # Wait for logits back from worker
-        logits = wait_for_tensor(1)
+        # Receive logits back from rank 1 (use template to know shape/dtype)
+        logits = network.wait_for_tensor(1, tensor_name='logits')
         half_pass_time = time.time() - half_pass_start_time
         half_pass_time_list.append(half_pass_time)
         log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape} in {half_pass_time} seconds")
