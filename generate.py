@@ -45,7 +45,7 @@ def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
     return int(next_token)
 
 
-def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50, top_p=0.95):
+def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50, top_p=0.80):
     """
     Generate a response by:
     1. Encoding prompt

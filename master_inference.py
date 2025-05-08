@@ -16,8 +16,7 @@ def main():
 
     messages = [
         {"role": "system",
-         "content": "You are a concise and confident AI assistant. Focus on giving clear, direct answers without thinking steps or extra reasoning. "
-                    "You are a confident assistant. Skip <think> steps and give a direct answer."}
+         "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}
     ]
 
     # STEP 1: Load first half of the model (layers 0-35)
