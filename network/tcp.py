@@ -68,4 +68,4 @@ def send_tensor(tensor_mx, node_id, port=5001):
         # Send data
         client_socket.sendall(tensor_bytes)
 
-        print(f"[Sender] Sent tensor of shape {shape} and dtype {dtype_name} to {server_ip}:{port}")
+        print(f"[Sender] Sent tensor of shape {shape} and dtype {dtype_name} to {nodes[node_id]}:{port}")
