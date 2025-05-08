@@ -3,16 +3,14 @@ from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug, trim_before_last_think
 from worker_inference import main as worker_inference
-from config import config
-
-cfg = config
+from config import config as cfg
 
 print(f"[INFO] Rank: {cfg.rank} / Size: {cfg.size} / Hostname: {os.uname().nodename}")
 
 
 def main():
     log_debug("=== Master Script started ===")
-    model_path = config.get("model_path")
+    model_path = cfg.get("model_path")
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     log_debug("Loaded tokenizer")
 

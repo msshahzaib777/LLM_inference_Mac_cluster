@@ -2,11 +2,12 @@ import os, datetime, glob, json
 import mlx.core as mx
 import mlx.nn as nn
 from models.qwen2 import Model, ModelArgs
+from config import config as cfg
 
 def log_debug(message, print_msg=False):
     """Append a debug message to the debug log file with timestamp."""
     DEBUG_LOG_FILE = os.path.abspath(
-        f"./logs/debug_log_rank{rank}.txt"
+        f"./logs/debug_log_rank{cfg.rank}.txt"
     )
 
     with open(DEBUG_LOG_FILE, "a") as f:
