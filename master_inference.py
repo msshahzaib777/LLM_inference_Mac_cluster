@@ -14,7 +14,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     log_debug("Loaded tokenizer")
 
-    # messages = [{"role": "system", "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}]
+    messages = [{"role": "system", "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}]
     # STEP 1: Load first half of the model (layers 0-35)
     log_debug("Loading first half of the model (layers 0-35)")
     model = load_model(model_path, 0, 35)
