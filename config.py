@@ -22,10 +22,6 @@ class Config:
             print(f"Warning: config file '{config_file}' not found. Using empty config.")
             self.config = {}
 
-        model_path = self.config.get('model_path')
-        if model_path:
-            print(f"model_path: {model_path}")
-
         # Initialize distributed rank and size
         self._init_distributed()
 
