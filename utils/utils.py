@@ -1,14 +1,9 @@
 import os, datetime, glob, json
 import mlx.core as mx
 import mlx.nn as nn
-from mpi4py import MPI
 from models.qwen2 import Model, ModelArgs
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-
 def log_debug(message, print_msg=False):
-
     """Append a debug message to the debug log file with timestamp."""
     DEBUG_LOG_FILE = os.path.abspath(
         f"./logs/debug_log_rank{rank}.txt"

@@ -1,18 +1,13 @@
 import os
-
 from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug, trim_before_last_think
 from worker_inference import main as worker_inference
 from config import config
 
-# Initialize the distributed environment
+cfg = config
 
-import mlx.core as mx
-world = mx.distributed.init(backend="mpi")
-rank = world.rank()
-size = world.size()
-print(f"[INFO] Rank: {rank} / Size: {size} / Hostname: {os.uname().nodename}")
+print(f"[INFO] Rank: {cfg.rank} / Size: {cfg.size} / Hostname: {os.uname().nodename}")
 
 
 def main():
@@ -54,7 +49,7 @@ def main():
     log_debug("=== Script finished ===")
 
 if __name__ == "__main__":
-    if rank == 0:
+    if cfg.rank == 0:
         main()
-    if rank == 1:
+    if cfg.rank == 1:
         worker_inference()
