@@ -99,7 +99,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         # logic for token per second calculation
         elapsed_time = time.time() - start_time
         if elapsed_time > 0:
-            log_debug(f"Tokens per second: {elapsed_time:.2f}")
+            log_debug(f"seconds per token: {elapsed_time:.2f}")
             token_time_list.append(elapsed_time)
         else:
             log_debug("Tokens per second: n/a (zero elapsed time)")
@@ -107,7 +107,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
     # # Convert generated tokens to output string
     output_ids = np.array(input_ids)[0]
     decoded_output = tokenizer.decode(output_ids, skip_special_tokens=True)
-    log_debug(f"[Generate] Decoded output: '{decoded_output}' with {mx.mean(mx.array(token_time_list))} tps and {mx.mean(mx.array(half_pass_time_list))} seconds per network pass.")
+    log_debug(f"[Generate] Decoded output: '{decoded_output}' with {1/mx.mean(mx.array(token_time_list))} tps and {mx.mean(mx.array(half_pass_time_list))} seconds per network pass.")
 
     return decoded_output
 
