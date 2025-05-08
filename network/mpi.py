@@ -38,7 +38,8 @@ def wait_for_tensor(source_rank=0, tag=0):
     tensor_np = np.frombuffer(recv_buffer, dtype=numpy_dtype).reshape(shape)
 
     # Step 5: Convert to MLX array with correct dtype
-    tensor_mx = mx.array(tensor_np, dtype=mlx_dtype_str)
+    tensor_mx = mx.array(tensor_np, dtype=mx.dtype(mlx_dtype_str))
+
     log_debug(f"[Receiver] Converted to MLX array with shape={tensor_mx.shape}, dtype={tensor_mx.dtype}")
 
     return tensor_mx
