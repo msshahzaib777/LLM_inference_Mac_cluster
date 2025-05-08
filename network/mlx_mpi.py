@@ -7,41 +7,52 @@ class MLXBackend(NetworkInterface):
     def wait_for_tensor(self, source_rank=0, **kwargs):
         log_debug(f"[Receiver] Receiving tensor from rank {source_rank}")
 
-        # Step 1: receive metadata
-        meta = mx.distributed.recv((4,), mx.int64, src=source_rank)
-        shape = tuple(int(x.item()) for x in meta[:3])
-        dtype_code = int(meta[3].item())
+        # Step 1: receive dtype string length and string
+        dtype_len_array = mx.distributed.recv((1,), mx.int64, src=source_rank)
+        dtype_len = int(dtype_len_array[0].item())
 
-        # Step 2: map dtype code
-        dtype_reverse_map = {1: mx.float16, 2: mx.float32, 3: mx.bfloat16, 4: mx.int32, 5: mx.int64}
-        dtype = dtype_reverse_map.get(dtype_code)
+        dtype_bytes_array = mx.distributed.recv((dtype_len,), mx.uint8, src=source_rank)
+        dtype_str = ''.join([chr(x.item()) for x in dtype_bytes_array])
+        dtype = getattr(mx, dtype_str, None)
         if dtype is None:
-            raise ValueError(f"Unsupported dtype code: {dtype_code}")
+            raise ValueError(f"Unsupported dtype received: {dtype_str}")
 
-        # Step 3: receive payload
-        numel = np.prod(shape)
+        # Step 2: receive shape length and shape array
+        shape_len_array = mx.distributed.recv((1,), mx.int64, src=source_rank)
+        shape_len = int(shape_len_array[0].item())
+
+        shape_array = mx.distributed.recv((shape_len,), mx.int64, src=source_rank)
+        shape = tuple(int(x.item()) for x in shape_array)
+
+        # Step 3: calculate number of elements
+        numel = int(mx.array(shape, dtype=mx.int64).prod().item())
+
+        # Step 4: receive payload
         payload = mx.distributed.recv((numel,), dtype, src=source_rank)
 
-        # Step 4: reshape
+        # Step 5: reshape to final tensor
         tensor = payload.reshape(shape)
 
-        log_debug(f"[Receiver] Received tensor with shape={shape}, dtype={dtype}")
+        log_debug(f"[Receiver] Received tensor with shape={shape}, dtype={dtype_str}")
         return tensor
 
     def send_tensor(self, tensor, dest_rank=1, **kwargs):
-        shape = mx.array(tensor.shape, dtype=mx.int64)
         dtype_str = str(tensor.dtype)
-        dtype_map = {'float16': 1, 'float32': 2, 'bfloat16': 3, 'int32': 4, 'int64': 5}
-        dtype_code = mx.array([dtype_map[dtype_str]], dtype=mx.int64)
+        dtype_bytes = dtype_str.encode('utf-8')
+        dtype_len = len(dtype_bytes)
 
-        log_debug(f"[Sender] Sending tensor to rank {dest_rank}, shape={tensor.shape}, dtype={dtype_str}")
+        # Step 1: send dtype length and dtype bytes
+        mx.distributed.send(mx.array([dtype_len], dtype=mx.int64), dest_rank)
+        mx.distributed.send(mx.array(list(dtype_bytes), dtype=mx.uint8), dest_rank)
 
-        # Flatten the payload
+        # Step 2: send shape length and shape array
+        shape = tensor.shape
+        shape_len = len(shape)
+        mx.distributed.send(mx.array([shape_len], dtype=mx.int64), dest_rank)
+        mx.distributed.send(mx.array(shape, dtype=mx.int64), dest_rank)
+
+        # Step 3: send flattened payload
         tensor_flat = tensor.flatten()
-
-        # Step 1: send metadata
-        metadata = mx.concatenate([shape, dtype_code], axis=0)
-        mx.distributed.send(metadata, dest_rank)
-
-        # Step 2: send payload
         mx.distributed.send(tensor_flat, dest_rank)
+
+        log_debug(f"[Sender] Sent tensor to rank {dest_rank}, shape={shape}, dtype={dtype_str}")
