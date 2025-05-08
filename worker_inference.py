@@ -1,15 +1,9 @@
 from config import config
 from network import network
 from utils.utils import log_debug, load_model
-import mlx.core as mx
-
-# Initialize the distributed environment
-world = mx.distributed.init()
-rank = world.rank()
-size = world.size()
-
 
 def main():
+
     log_debug("=== Worker script started ===")
 
     model_path = config.get('model_path')

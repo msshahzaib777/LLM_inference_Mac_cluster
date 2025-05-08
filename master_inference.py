@@ -3,9 +3,10 @@ from generate import generate
 from utils.utils import load_model, log_debug, trim_before_last_think
 from worker_inference import main as worker_inference
 from config import config
-import mlx.core as mx
 
 # Initialize the distributed environment
+
+import mlx.core as mx
 world = mx.distributed.init()
 rank = world.rank()
 size = world.size()
