@@ -27,6 +27,7 @@ class Config:
 
     def _init_distributed(self):
         world = mx.distributed.init()
+        world.barrier()
         self.rank = world.rank()
         self.size = world.size()
 
