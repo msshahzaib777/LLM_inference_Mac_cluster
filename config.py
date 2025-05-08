@@ -67,7 +67,9 @@ class Config:
             'shape': [1, max_seq_length, vocab_size],
             'dtype': dtype_logits
         })
+        print(json.dumps(tensor_shapes, indent=4))
         self.config.setdefault('tensor_shapes', tensor_shapes)
+        print(json.dumps(self.config, indent=4))
 
     def get(self, key, default=None):
         """Generic getter for config values."""
@@ -78,7 +80,7 @@ class Config:
         info = self.config.get('tensor_shapes', {}).get(name)
         if not info:
             raise ValueError(f"Tensor template '{name}' not defined in config.yaml or model config.")
-        print(json.dumps(info, indent=4))
+
         shape = tuple(info['shape'])
         dtype_str = info.get('dtype', 'float32')
         dtype = getattr(mx, dtype_str)
