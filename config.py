@@ -77,7 +77,7 @@ class Config:
         info = self.config.get('tensor_shapes', {}).get(name)
         if not info:
             raise ValueError(f"Tensor template '{name}' not defined in config.yaml or model config.")
-
+        print(json.dumps(info, indent=4))
         shape = tuple(info['shape'])
         dtype_str = info.get('dtype', 'float32')
         dtype = getattr(mx, dtype_str)
