@@ -60,7 +60,8 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
     len_of_input_ids = len(input_ids[0])
     log_debug(f"[Generate] Encoded input_ids: shape={input_ids.shape}")
     max_length = max_length + len_of_input_ids
-
+    token_time_list = []
+    half_pass_time_list = []
     for step in range(max_length):
         start_time = time.time()
         log_debug(f"[Generate] Step {step + 1}/{max_length}")
@@ -77,6 +78,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         # Wait for logits back from worker
         logits = wait_for_tensor(1)
         half_pass_time = time.time() - half_pass_start_time
+        half_pass_time_list.append(half_pass_time)
         log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape} in {half_pass_time} seconds")
 
         # Get logits for last token
@@ -85,7 +87,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
 
         # Sample next token from logits
         next_token = sample_next_token(logits_last[0], temperature, top_k, top_p)
-
+        log_debug(f"[Generate] Next token: {tokenizer.decode(next_token)}")
         # Append sampled token to input_ids
         input_ids = mx.concatenate([input_ids, mx.array([[next_token]])], axis=1)
 
@@ -96,14 +98,15 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         # logic for token per second calculation
         elapsed_time = time.time() - start_time
         if elapsed_time > 0:
-            log_debug(f"\n⚡ Tokens per second: {elapsed_time:.2f}")
+            log_debug(f"Tokens per second: {elapsed_time:.2f}")
+            token_time_list.append(elapsed_time)
         else:
-            log_debug("\n⚡ Tokens per second: n/a (zero elapsed time)")
+            log_debug("Tokens per second: n/a (zero elapsed time)")
 
     # # Convert generated tokens to output string
     output_ids = np.array(input_ids)[0]
     decoded_output = tokenizer.decode(output_ids, skip_special_tokens=True)
-    log_debug(f"[Generate] Decoded output: '{decoded_output}'")
+    log_debug(f"[Generate] Decoded output: '{decoded_output}' with {mx.mean(mx.array(token_time_list))} tps and {mx.mean(mx.array(half_pass_time_list))} seconds per network pass.")
 
     return decoded_output
 

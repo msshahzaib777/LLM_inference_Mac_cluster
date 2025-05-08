@@ -15,7 +15,8 @@ def main():
     log_debug("Loaded tokenizer")
 
     messages = [
-        # {"role": "system", "content": "You are a helpful AI assistant."}
+        {"role": "system",
+         "content": "You are a concise and confident AI assistant. Focus on giving clear, direct answers without thinking steps or extra reasoning."}
     ]
 
     # STEP 1: Load first half of the model (layers 0-35)
