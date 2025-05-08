@@ -19,11 +19,11 @@ def wait_for_tensor(machine, tag=0, port=5001):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind(('', port))
         server_socket.listen(1)
-        print(f"[Receiver] Waiting for connection on port {port}...")
+        log_debug(f"[Receiver] Waiting for connection on port {port}...")
 
         conn, addr = server_socket.accept()
         with conn:
-            print(f"[Receiver] Connected by {addr}")
+            log_debug(f"[Receiver] Connected by {addr}")
 
             # Receive header line
             header_line = b""
@@ -33,7 +33,7 @@ def wait_for_tensor(machine, tag=0, port=5001):
             shape = tuple(map(int, parts[:-1]))
             dtype = np.dtype(parts[-1])
 
-            print(f"[Receiver] Expecting tensor of shape {shape} and dtype {dtype}")
+            log_debug(f"[Receiver] Expecting tensor of shape {shape} and dtype {dtype}")
 
             expected_bytes = np.prod(shape) * dtype.itemsize
 
