@@ -14,10 +14,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     log_debug("Loaded tokenizer")
 
-    # messages = f"{tokenizer.bos_token}< | system | >You are a confident assistant. Skip <think> steps and give a direct answer.< | user | >"
-    # eof_prompt = " < | assistant | > <think> </think> "
-    messages = f"<|system|> You are a confident assistant. Skip <think> steps and give a direct answer. <|user|> "
-    eof_prompt = " <|assistant|> "
+    # messages = [{"role": "system", "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}]
     # STEP 1: Load first half of the model (layers 0-35)
     log_debug("Loading first half of the model (layers 0-35)")
     model = load_model(model_path, 0, 35)
@@ -33,11 +30,13 @@ def main():
             if user_input.lower() in ['exit', 'quit']:
                 print("Goodbye!")
                 break
-            prompt = messages + user_input + eof_prompt
+
+            # prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            prompt = user_input
             response = generate(prompt, model, tokenizer, max_length=500)
             response = trim_before_last_think(response)
             log_debug("Qwen2.5: " + response, print_msg=True)
-            messages = messages + " <|assistant|> " + response + " <|user|> "
+            # messages.append({"role": "assistant", "content": response})
 
         except (KeyboardInterrupt, EOFError):
             print("\nGoodbye!")
