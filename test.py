@@ -13,9 +13,11 @@ if rank == 0:
     print(f"[Rank {rank}] Send complete", flush=True)
 
 elif rank == 1:
-    template = mx.zeros((2, 2), dtype=mx.float32)
+    # Explicit shape + dtype (safe approach)
+    shape = (2, 2)
+    dtype = mx.float32
     print(f"[Rank {rank}] Waiting to receive tensor...", flush=True)
-    received_tensor = mx.distributed.recv_like(template, src=0)
+    received_tensor = mx.distributed.recv(shape, dtype, src=0)
     print(f"[Rank {rank}] Received tensor:\n{received_tensor}", flush=True)
 
 print(f"[Rank {rank}] Done.", flush=True)
