@@ -4,7 +4,7 @@ import mlx.core as mx
 import json, os
 
 # Path to your JSON file
-file_path = './nodes.json'
+file_path = 'network/nodes.json'
 
 # Convert to absolute path
 file_path = os.path.abspath(file_path)
