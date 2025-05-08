@@ -70,7 +70,7 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         log_debug(f"[Generate] Step {step + 1}/{max_length}")
 
         # Forward pass to get hidden state for first partition
-        hidden, past_key_values = model(input_ids, cache=past_key_values)
+        hidden, past_key_values = model(input_ids, past_key_values=past_key_values)
         log_debug(f"[Generate] Computed hidden state: shape={hidden.shape}")
 
         # Send hidden state to worker (rank 1)
