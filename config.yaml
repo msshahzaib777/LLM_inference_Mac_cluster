@@ -1,5 +1,5 @@
 model_path: /Users/studentone/Documents/LLM_inference/models/qwen2.5-32b-instruct-bf16
-network_backend: mpi
+network_backend: mlx_mpi
 mpi:
   interface: bridge0
   num_ranks: 2

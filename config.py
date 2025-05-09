@@ -33,7 +33,7 @@ class Config:
         self.size = self.world.Get_size()
 
     def _init_distributed_mlx(self):
-        self.world = mx.distributed.init(backend='mpi')
+        self.world = mx.distributed.init(backend='ring')
         self.rank = self.world.rank()
         self.size = self.world.size()
 
