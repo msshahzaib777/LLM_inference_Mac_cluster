@@ -15,7 +15,7 @@ if rank == 0:
 if rank == 1:
     shape = (2, 2)
     dtype = mx.float32
-    tensor = mx.empty(shape, dtype=dtype)
+    tensor = mx.zeros(shape, dtype=dtype)
     print(f"[Rank {rank}] Waiting to receive tensor...", flush=True)
     received_tensor = mx.distributed.recv_like(tensor, src=0)
     print(f"[Rank {rank}] Received tensor:\n{received_tensor}", flush=True)
