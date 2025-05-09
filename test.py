@@ -1,3 +1,5 @@
+import time
+
 import mlx.core as mx
 
 group = mx.distributed.init()
@@ -21,6 +23,7 @@ if rank == 1:
     received_tensor = mx.distributed.recv(shape, dtype, src=0)
     print(f"[Rank {rank}] Received tensor:\n{received_tensor}", flush=True)
 elif rank == 0:
+    time.sleep(5)
     tensor = mx.array([[1.0, 2.0], [3.0, 4.0]], dtype=mx.float32)
     print(f"[Rank {rank}] Sending tensor:\n{tensor}", flush=True)
     mx.distributed.send(tensor, dst=1)
