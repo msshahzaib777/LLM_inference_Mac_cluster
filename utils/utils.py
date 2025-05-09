@@ -95,10 +95,10 @@ def trim_before_last_think(response):
 
 # Define once at the top of the file
 mlx_dtype_map = {
-    'bfloat16': mx.bfloat16,
-    'float16': mx.float16,
-    'float32': mx.float32,
-    'float64': mx.float64,
-    'int32': mx.int32,
-    'int64': mx.int64,
+    'mlx.core.bfloat16': mx.bfloat16,
+    'mlx.core.float16': mx.float16,
+    'mlx.core.float32': mx.float32,
+    'mlx.core.float64': mx.float64,
+    'mlx.core.int32': mx.int32,
+    'mlx.core.int64': mx.int64,
 }
