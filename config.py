@@ -21,12 +21,13 @@ class Config:
         except FileNotFoundError:
             print(f"Warning: config file '{config_file}' not found. Using empty config.")
             self.config = {}
+        if config.get("network_backend", "mlx_mpi") == 'mlx_mpi':
+            # Initialize distributed rank and size
+            self._init_distributed()
 
-        # Initialize distributed rank and size
-        self._init_distributed()
 
     def _init_distributed(self):
-        world = mx.distributed.init()
+        world = mx.distributed.init(backend='mpi')
         self.world = world
         self.rank = world.rank()
         self.size = world.size()
