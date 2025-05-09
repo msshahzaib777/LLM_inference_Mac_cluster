@@ -1,3 +1,5 @@
+import time
+
 from utils.utils import mlx_dtype_map, log_debug
 from mpi4py import MPI
 import numpy as np
@@ -67,6 +69,13 @@ class MPIBackend(NetworkInterface):
 
         # Step 3: Send raw bytes
         send_buffer = tensor_np.tobytes()
+        start_time = time.time()
         req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
         req.Wait()
-        log_debug(f"[Sender] Sent {num_bytes} bytes to rank {dest_rank}")
+        end_time = time.time()
+
+        duration = end_time - start_time
+        speed_gbps = (num_bytes * 8) / (duration * 1e9)
+
+        log_debug(f"[Sender] Sent tensor to rank {dest_rank}, shape={shape}, dtype={mlx_dtype_str}")
+        log_debug(f"[Sender] Transfer speed: {speed_gbps:.2f} Gbps over {duration:.4f} seconds")

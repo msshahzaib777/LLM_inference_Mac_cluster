@@ -84,5 +84,3 @@ class MLXBackend(NetworkInterface):
 
         log_debug(f"[Sender] Sent tensor to rank {dest_rank}, shape={shape}, dtype={dtype_str}")
         log_debug(f"[Sender] Transfer speed: {speed_gbps:.2f} Gbps over {duration:.4f} seconds")
-
-        log_debug(f"[Sender] Sent tensor to rank {dest_rank}, shape={shape}, dtype={dtype_str}")
