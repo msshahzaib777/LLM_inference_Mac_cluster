@@ -27,6 +27,7 @@ class Config:
             self._init_distributed_mlx()
         else:
             self._init_distributed_mpi()
+
     def _init_distributed_mpi(self):
         self.world = MPI.COMM_WORLD
         self.rank = self.world.Get_rank()
