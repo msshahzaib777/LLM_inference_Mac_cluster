@@ -1,6 +1,7 @@
 # config.py
 import json, os, yaml
 import mlx.core as mx
+from mpi4py import MPI
 
 class Config:
     """Global configuration loader for model paths, tensor shapes, and backend options."""
@@ -23,14 +24,18 @@ class Config:
             self.config = {}
         if self.config.get("network_backend", "mlx_mpi") == 'mlx_mpi':
             # Initialize distributed rank and size
-            self._init_distributed()
+            self._init_distributed_mlx()
+        else:
+            self._init_distributed_mpi()
+    def _init_distributed_mpi(self):
+        self.world = MPI.COMM_WORLD
+        self.rank = self.world.Get_rank()
+        self.size = self.world.Get_size()
 
-
-    def _init_distributed(self):
-        world = mx.distributed.init(backend='mpi')
-        self.world = world
-        self.rank = world.rank()
-        self.size = world.size()
+    def _init_distributed_mlx(self):
+        self.world = mx.distributed.init(backend='mpi')
+        self.rank = self.world.rank()
+        self.size = self.world.size()
 
     def get(self, key, default=None):
         """Generic getter for config values."""

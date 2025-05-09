@@ -2,6 +2,7 @@ from utils.utils import mlx_dtype_map, log_debug
 from mpi4py import MPI
 import numpy as np
 import mlx.core as mx
+from config import config as cfg
 
 from .interface import NetworkInterface
 
@@ -11,7 +12,7 @@ class MPIBackend(NetworkInterface):
         Receive a tensor (MLX array) as raw bytes from another MPI rank,
         preserving MLX special types like bfloat16.
         """
-        comm = MPI.COMM_WORLD
+        comm = cfg.world
         tag = kwargs.get('tag', 0)
         # Step 1: Receive metadata (shape, numpy dtype, mlx dtype)
         metadata = comm.recv(source=source_rank, tag=tag)
@@ -47,7 +48,7 @@ class MPIBackend(NetworkInterface):
         Send a tensor (MLX array) as raw bytes to another MPI rank,
         including both NumPy dtype and MLX dtype in metadata.
         """
-        comm = MPI.COMM_WORLD
+        comm = cfg.world
         tag = kwargs.get('tag', 0)
         # Step 1: Convert MLX array to NumPy array
         tensor_np = np.array(tensor_mx)
