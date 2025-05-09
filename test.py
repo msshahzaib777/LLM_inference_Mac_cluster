@@ -1,6 +1,6 @@
 import mlx.core as mx
 
-group = mx.distributed.init()
+group = mx.distributed.init(backend='mpi')
 rank = group.rank()
 size = group.size()
 
