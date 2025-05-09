@@ -1,12 +1,12 @@
 import os
+from config import config as cfg
+
 from safetensors.torch import safe_open, save_file
 
-# Replace with the path to your model directory
-model_dir = "/DeepSeek-R1-Distill-Qwen-32B"
-
-for filename in os.listdir(model_dir):
+model_path= cfg.get("model_path")
+for filename in os.listdir(model_path):
     if filename.endswith(".safetensors"):
-        file_path = os.path.join(model_dir, filename)
+        file_path = os.path.join(model_path, filename)
         tensors = {}
         with safe_open(file_path, framework="pt") as f:
             for key in f.keys():
