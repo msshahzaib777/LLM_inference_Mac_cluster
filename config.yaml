@@ -1,5 +1,5 @@
-model_path: /Users/studentone/Documents/LLM_inference/models/qwen2.5-32b-instruct-bf16
-network_backend: mpi
+model_path: /Users/studentone/Documents/LLM_inference/models/DeepSeek-R1-Distill-Qwen-32B
+network_backend: tcp
 mpi:
   interface: bridge0
   num_ranks: 2

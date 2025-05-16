@@ -52,6 +52,29 @@ class MPIBackend(NetworkInterface):
         """
         comm = cfg.world
         tag = kwargs.get('tag', 0)
+
+        # Store original MLX dtype
+        original_dtype_str = str(tensor_mx.dtype)
+
+        # Convert to NumPy-compatible dtype if necessary
+        if original_dtype_str == "bfloat16":
+            tensor_mx = tensor_mx.astype(mx.float32)
+
+        tensor_np = np.array(tensor_mx)
+        shape = tensor_np.shape
+        numpy_dtype_str = tensor_np.dtype.str
+        num_elements = np.prod(shape)
+        num_bytes = num_elements * tensor_np.dtype.itemsize
+
+        # Send metadata: shape, numpy dtype, original MLX dtype
+        metadata = (shape, numpy_dtype_str, original_dtype_str)
+        comm.send(metadata, dest=dest_rank, tag=tag)
+
+        # Send raw bytes
+        send_buffer = tensor_np.tobytes()
+        req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
+        req.Wait()
+
         # Step 1: Convert MLX array to NumPy array
         tensor_np = np.array(tensor_mx)
         shape = tensor_np.shape
