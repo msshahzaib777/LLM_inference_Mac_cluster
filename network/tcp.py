@@ -4,21 +4,20 @@ import mlx.core as mx
 import json, os
 
 from utils.utils import log_debug
+from config import config as cfg
 
 # Path to your JSON file
-file_path = 'network/nodes.json'
-
-# Convert to absolute path
-file_path = os.path.abspath(file_path)
+file_path = os.path.abspath('network/nodes.json')
 
 # Open and read the JSON file
 with open(file_path, 'r') as file:
     nodes = json.load(file)
+
 from .interface import NetworkInterface
 
 class TCPBackend(NetworkInterface):
     def wait_for_tensor(self, node_id, **kwargs):
-        port =kwargs.get('port', 5001)
+        port =nodes[node_id]["port"]
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             server_socket.bind(('', port))
             server_socket.listen(1)
@@ -64,8 +63,8 @@ class TCPBackend(NetworkInterface):
         dtype_name = tensor_np.dtype.name  # e.g., 'float32', 'int64'
         port = kwargs.get('port')
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            log_debug(f"[Receiver] Sending tensor to port {port} node: {dest_rank}...")
-            client_socket.connect((nodes[dest_rank], port))
+            log_debug(f"[Receiver] Sending tensor to port {nodes[dest_rank]["port"]} node: {dest_rank}...")
+            client_socket.connect((nodes[dest_rank]["ip"], nodes[dest_rank]["port"]))
 
             # Send header: shape + dtype, separated by commas, ending with newline
             header = f"{','.join(map(str, shape))},{dtype_name}\n"
@@ -74,4 +73,4 @@ class TCPBackend(NetworkInterface):
             # Send data
             client_socket.sendall(tensor_bytes)
 
-            log_debug(f"[Sender] Sent tensor of shape {shape} and dtype {dtype_name} to {nodes[dest_rank]}:{port}")
+            log_debug(f"[Sender] Sent tensor of shape {shape} and dtype {dtype_name} to {nodes[dest_rank]["ip"]}:{nodes[dest_rank]["port"]}")
