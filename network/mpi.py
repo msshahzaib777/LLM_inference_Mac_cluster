@@ -15,6 +15,8 @@ class MPIBackend(NetworkInterface):
         Receive a tensor (MLX array) as raw bytes from another MPI rank,
         preserving MLX special types like bfloat16.
         """
+        log_debug(
+            f"[Receiver] Waiting for tensor from rank {source_rank}")
         comm = cfg.world
         tag = kwargs.get('tag', 0)
         # Step 1: Receive metadata (shape, numpy dtype, mlx dtype)
