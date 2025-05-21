@@ -72,7 +72,7 @@ class MPIBackend(NetworkInterface):
 
         # Send raw bytes
         send_buffer = tensor_np.tobytes()
-        req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
+        req = comm.send([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
         req.Wait()
 
         # Step 1: Convert MLX array to NumPy array

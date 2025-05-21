@@ -63,7 +63,7 @@ class TCPBackend(NetworkInterface):
         dtype_name = tensor_np.dtype.name  # e.g., 'float32', 'int64'
         port = kwargs.get('port')
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            log_debug(f"[Receiver] Sending tensor to port {nodes[dest_rank]["port"]} node: {dest_rank}...")
+            log_debug(f"[Sender] Sending tensor to port {nodes[dest_rank]["port"]} node: {dest_rank}...")
             client_socket.connect((nodes[dest_rank]["ip"], nodes[dest_rank]["port"]))
 
             # Send header: shape + dtype, separated by commas, ending with newline
