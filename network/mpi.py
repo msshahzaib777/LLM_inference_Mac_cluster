@@ -47,62 +47,38 @@ class MPIBackend(NetworkInterface):
 
         return tensor_mx
 
-
     async def send_tensor(self, tensor_mx, dest_rank=1, **kwargs):
-        """
-        Send a tensor (MLX array) as raw bytes to another MPI rank,
-        including both NumPy dtype and MLX dtype in metadata.
-        """
         loop = asyncio.get_running_loop()
         comm = cfg.world
         tag = kwargs.get('tag', 0)
 
-        # Store original MLX dtype
         original_dtype_str = str(tensor_mx.dtype)
 
-        # Convert to NumPy-compatible dtype if necessary
         if original_dtype_str == "bfloat16":
             tensor_mx = tensor_mx.astype(mx.float32)
 
         tensor_np = np.array(tensor_mx)
         shape = tensor_np.shape
         numpy_dtype_str = tensor_np.dtype.str
+        mlx_dtype_str = original_dtype_str
         num_elements = np.prod(shape)
         num_bytes = num_elements * tensor_np.dtype.itemsize
 
-        # Send metadata: shape, numpy dtype, original MLX dtype
-        metadata = (shape, numpy_dtype_str, original_dtype_str)
-        comm.send(metadata, dest=dest_rank, tag=tag)
+        log_debug(
+            f"[Sender] Preparing to send tensor: shape={shape}, numpy_dtype={numpy_dtype_str}, mlx_dtype={mlx_dtype_str}, num_bytes={num_bytes}")
 
-        # Send raw bytes
-        send_buffer = tensor_np.tobytes()
-        req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
-        req.Wait()
-
-        # Step 1: Convert MLX array to NumPy array
-        tensor_np = np.array(tensor_mx)
-        shape = tensor_np.shape
-        numpy_dtype_str = tensor_np.dtype.str       # e.g., '<f4'
-        mlx_dtype_str = str(tensor_mx.dtype)       # e.g., 'bfloat16'
-        num_elements = np.prod(shape)
-        num_bytes = num_elements * tensor_np.dtype.itemsize
-
-        log_debug(f"[Sender] Preparing to send tensor: shape={shape}, numpy_dtype={numpy_dtype_str}, mlx_dtype={mlx_dtype_str}, num_elements={num_elements}, num_bytes={num_bytes}")
-
-        # Step 2: Send metadata
         metadata = (shape, numpy_dtype_str, mlx_dtype_str)
         comm.send(metadata, dest=dest_rank, tag=tag)
         log_debug(f"[Sender] Sent metadata to rank {dest_rank}")
 
-        # Step 3: Send raw bytes
         send_buffer = tensor_np.tobytes()
         start_time = time.time()
         req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
-        req.Wait()  # This yields control while waiting
+        req.Wait()
         end_time = time.time()
 
         duration = end_time - start_time
         speed_gbps = (num_bytes * 8) / (duration * 1e9)
 
-        log_debug(f"[Sender] Sent tensor to rank {dest_rank}, shape={shape}, dtype={mlx_dtype_str}")
+        log_debug(f"[Sender] Sent tensor to rank {dest_rank}, dtype={mlx_dtype_str}")
         log_debug(f"[Sender] Transfer speed: {speed_gbps:.2f} Gbps over {duration:.4f} seconds")
