@@ -1,3 +1,5 @@
+import asyncio
+
 from config import config as cfg
 from network import network
 from utils.utils import log_debug, load_model
@@ -27,7 +29,7 @@ def main():
             # Send logits back to rank 0
             log_debug("Sending logits tensor back to rank 0")
 
-            network.send_tensor(logits, 0)
+            asyncio.run(network.send_tensor(logits, 0))
         except RuntimeError as e:
             loop = False
             log_debug("Exception encountered: {}".format(e))
