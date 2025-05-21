@@ -98,7 +98,7 @@ class MPIBackend(NetworkInterface):
         send_buffer = tensor_np.tobytes()
         start_time = time.time()
         req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
-        await loop.run_in_executor(None, req.Wait)  # This yields control while waiting
+        req.Wait()  # This yields control while waiting
         end_time = time.time()
 
         duration = end_time - start_time
