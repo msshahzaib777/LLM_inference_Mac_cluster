@@ -14,7 +14,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     log_debug("Loaded tokenizer")
 
-    messages = [{"role": "system", "content": "You are a confident assistant. Skip <think> steps and give a direct answer."}]
+    messages = [{"role": "system", "content": "You are a AI assistant with alot of knowledge."}]
     # STEP 1: Load first half of the model (layers 0-35)
     log_debug("Loading first half of the model (layers 0-35)")
     model = load_model(model_path, 0, 35)
@@ -32,7 +32,6 @@ def main():
                 break
             messages.append({"role": "user", "content": user_input})
             prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            prompt = prompt + "</think>"
             response = generate(prompt, model, tokenizer, max_length=500)
             response = trim_before_last_think(response)
             log_debug("Qwen2.5: " + response, print_msg=True)
