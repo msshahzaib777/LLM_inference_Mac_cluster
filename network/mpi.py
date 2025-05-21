@@ -95,7 +95,7 @@ class MPIBackend(NetworkInterface):
         # Step 3: Send raw bytes
         send_buffer = tensor_np.tobytes()
         start_time = time.time()
-        req = comm.send([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
+        req = comm.Isend([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
         await loop.run_in_executor(None, req.Wait)  # This yields control while waiting
         end_time = time.time()
 
