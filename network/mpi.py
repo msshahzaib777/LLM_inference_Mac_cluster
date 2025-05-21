@@ -1,3 +1,4 @@
+import asyncio
 import time
 
 from utils.utils import mlx_dtype_map, log_debug
@@ -45,11 +46,12 @@ class MPIBackend(NetworkInterface):
         return tensor_mx
 
 
-    def send_tensor(self, tensor_mx, dest_rank=1, **kwargs):
+    async def send_tensor(self, tensor_mx, dest_rank=1, **kwargs):
         """
         Send a tensor (MLX array) as raw bytes to another MPI rank,
         including both NumPy dtype and MLX dtype in metadata.
         """
+        loop = asyncio.get_running_loop()
         comm = cfg.world
         tag = kwargs.get('tag', 0)
 
@@ -94,7 +96,7 @@ class MPIBackend(NetworkInterface):
         send_buffer = tensor_np.tobytes()
         start_time = time.time()
         req = comm.send([send_buffer, MPI.BYTE], dest=dest_rank, tag=tag + 1)
-        # req.Wait()
+        await loop.run_in_executor(None, req.Wait)  # This yields control while waiting
         end_time = time.time()
 
         duration = end_time - start_time
