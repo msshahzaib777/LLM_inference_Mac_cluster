@@ -31,8 +31,8 @@ class MPIBackend(NetworkInterface):
         recv_buffer = bytearray(num_bytes)
 
         # Step 3: Receive raw bytes
-        req = comm.recv([recv_buffer, MPI.BYTE], source=source_rank, tag=tag + 1)
-        # req.Wait()
+        req = comm.Irecv([recv_buffer, MPI.BYTE], source=source_rank, tag=tag + 1)
+        req.Wait()
         log_debug(f"[Receiver] Received {num_bytes} bytes from rank {source_rank}")
 
         # Step 4: Reconstruct NumPy array
