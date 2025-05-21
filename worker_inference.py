@@ -30,6 +30,7 @@ def main():
             network.send_tensor(logits, 0)
         except RuntimeError as e:
             loop = False
+            log_debug("Exception encountered: {}".format(e))
     log_debug("=== Worker script finished ===")  # (theoretically unreachable here)
 
 if __name__ == "__main__":
