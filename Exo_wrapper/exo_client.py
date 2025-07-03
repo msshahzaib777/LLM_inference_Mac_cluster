@@ -2,7 +2,7 @@ import requests
 import json
 
 class ExoClient:
-    def __init__(self, api_url, api_key=None, model="gpt-3.5-turbo"):
+    def __init__(self, api_url, api_key=None, model=""):
         self.api_url = api_url.rstrip('/')
         self.api_key = api_key
         self.model = model
