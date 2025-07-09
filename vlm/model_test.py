@@ -1,18 +1,18 @@
 import random
 import re
+import os
+import json
 from PIL import Image
 from mlx_vlm import load, generate
 from mlx_vlm.prompt_utils import apply_chat_template
 from mlx_vlm.utils import load_config
 from vlm.environment2d.environment2d import Environment2D
 
-plot_path = "/Users/studentone/Documents/LLM_inference/vlm/samples"
-env_name = "env1"
-
-model_path = "mlx-community/Qwen2.5-VL-32B-Instruct-8bit"
-# model_path =  "Qwen/Qwen3-32B-MLX-8bit"
-# model_path = "mlx-community/Qwen2.5-VL-72B-Instruct-4bit"
-# model_path = "mlx-community/Qwen3-8B-bf16"
+samples_folder = "/Users/studentone/Documents/LLM_inference/vlm/samples"
+env_name = "env5"
+create_new_env = False
+plot_path = f"{samples_folder}/{env_name}"
+model_path = "mlx-community/Qwen2.5-VL-72B-Instruct-4bit"
 
 def parse_llm_action(output):
     output = output.strip()
@@ -35,6 +35,23 @@ def parse_llm_action(output):
     print("Invalid format: Could not find valid 'Action: <direction>, <step>'")
     return None, None, None
 
+def load_merged_chats(env_count, base_dir = samples_folder):
+    merged_chat = []
+
+    for i in range(1, env_count + 1):
+        file_path = os.path.join(base_dir, f"env{i}", f"env{i}.json")
+
+        if not os.path.exists(file_path):
+            print(f"Warning: {file_path} not found, skipping.")
+            continue
+
+        with open(file_path, "r") as f:
+            chat = json.load(f)
+            merged_chat.extend(chat)
+
+    print(f"Loaded {len(merged_chat)} chat messages from {env_count} environments.")
+    return merged_chat
+
 def run_vlm_guided_navigation():
     default_config = {
         'rectangle_size_range': (4, 30),
@@ -45,22 +62,25 @@ def run_vlm_guided_navigation():
         'obstacle_margin': 5
     }
     env = Environment2D(width=100, height=100, grid_resolution=1, config=default_config)
-    margin, min_dist = 5, 20
-    start = (random.randint(margin, env.width - margin), random.randint(margin, env.height - margin))
-    goal = start
-    while ((goal[0] - start[0]) ** 2 + (goal[1] - start[1]) ** 2) ** 0.5 < min_dist:
-        goal = (random.randint(margin, env.width - margin), random.randint(margin, env.height - margin))
-    env.set_start(*start)
-    env.set_goal(*goal)
+    if create_new_env:
+        margin, min_dist = 5, 20
+        start = (random.randint(margin, env.width - margin), random.randint(margin, env.height - margin))
+        goal = start
+        while ((goal[0] - start[0]) ** 2 + (goal[1] - start[1]) ** 2) ** 0.5 < min_dist:
+            goal = (random.randint(margin, env.width - margin), random.randint(margin, env.height - margin))
+        env.set_start(*start)
+        env.set_goal(*goal)
 
-    obstacle_distribution = {
-        "rectangle": 0.5,
-        "circle": 0,
-        "wall": 0.5
-    }
-    env.generate_obstacles(num_obstacles=5, distribution=obstacle_distribution)
-    # env.save_environment(f"{plot_path}/pkls/{env_name}.pkl")
-    env = env.load_environment(f"{plot_path}/pkls/{env_name}.pkl")
+        obstacle_distribution = {
+            "rectangle": 0.5,
+            "circle": 0,
+            "wall": 0.5
+        }
+        env.generate_obstacles(num_obstacles=5, distribution=obstacle_distribution)
+        env.save_environment(f"{plot_path}/{env_name}.pkl")
+        env.render()
+    else:
+        env = env.load_environment(f"{plot_path}/{env_name}.pkl")
     image_path = env.get_environment_image(f"{plot_path}/{env_name}.png")
     model, processor = load(model_path)
     config = load_config(model_path)
@@ -90,23 +110,14 @@ If the robot has reached the goal, I respond with:
 
 I always include a brief explanation of my observation and decision before the action.
 '''
-
-    prompt2 = '''You are my navigation agent. Given a 2D image showing a robot (blue), goal (red), start (green), obstacles (black), and path (thin blue), guide the robot toward the goal.
-
-Only respond with:
-Action: <direction>, <step size>
-
-Direction must be one of: north, northeast, east, southeast, south, southwest, west, northwest.  
-Step size is an integer based on visual distance to the goal without hitting obstacles.
-
-Do not add explanations or reasoning. If the goal is reached:
-Final Answer: Finished!
-    '''
-    messages = [
+    messages = []
+    # messages = load_merged_chats(4)
+    messages.extend([
         {"role": "assistant", "content": prompt},
         {"role": "user", "content": f"Here is the current environment. What should be the next move?",
                      "images": [image_path]}
-    ]
+    ])
+
     for step_num in range(50):
         formatted_prompt = apply_chat_template(
             processor, config, messages, num_images=1
@@ -135,4 +146,4 @@ Final Answer: Finished!
              "images": [image_path]})
         print(messages[-1])
 
-# run_vlm_guided_navigation()
+run_vlm_guided_navigation()

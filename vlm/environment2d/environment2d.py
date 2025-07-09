@@ -182,6 +182,20 @@ class Environment2D:
 
         raise RuntimeError("Failed to generate a valid environment after max retries")
 
+    def generate_maze(self):
+        self.obstacles.clear()
+        self.grid.fill(0)
+        cell_size = self.grid_spacing
+        for x in range(0, self.width, cell_size):
+            for y in range(0, self.height, cell_size):
+                if random.random() < 0.6:
+                    wall_thickness = self.config['wall_thickness']
+                    self.obstacles.append(RectangleObstacle(x, y, wall_thickness, cell_size))
+                    self._mark_obstacle_on_grid(x, y, wall_thickness, cell_size)
+                if random.random() < 0.6:
+                    wall_thickness = self.config['wall_thickness']
+                    self.obstacles.append(RectangleObstacle(x, y, cell_size, wall_thickness))
+                    self._mark_obstacle_on_grid(x, y, cell_size, wall_thickness)
     # Utility functions
 
     def _line_intersects_rect(x1, y1, x2, y2, rx, ry, rw, rh):
@@ -242,26 +256,17 @@ class Environment2D:
         fig, ax = plt.subplots()
         ax.set_xlim(0, self.width)
         ax.set_ylim(0, self.height)
-
-        if self.start:
-            ax.add_patch(plt.Circle(self.start, radius=2, color='green'))
-
-        if self.goal:
-            ax.add_patch(plt.Circle(self.goal, radius=2, color='red'))
-
-        if self.robot:
-            ax.add_patch(plt.Circle(self.robot, radius=2, color='blue'))
-
-        for obs in self.obstacles:
-            obs.draw(ax)
-
-        # Draw robot path
+        for x in range(0, self.width, 1): ax.axvline(x, color='lightgray', linestyle='--', linewidth=0.5)
+        for y in range(0, self.height, 1): ax.axhline(y, color='lightgray', linestyle='--', linewidth=0.5)
+        if self.start: ax.add_patch(plt.Circle(self.start, radius=2, color='green'))
+        if self.goal: ax.add_patch(plt.Circle(self.goal, radius=2, color='red'))
+        if self.robot: ax.add_patch(plt.Circle(self.robot, radius=2, color='blue'))
+        for obs in self.obstacles: obs.draw(ax)
         if len(self.trajectory_log) > 1:
-            points = [step["position"] for step in self.trajectory_log]
-            xs, ys = zip(*points)
-            ax.plot(xs, ys, color='lightblue', linewidth=1.5)
-
-        plt.gca().set_aspect('equal', adjustable='box')
+            path_points = [entry['position'] for entry in self.trajectory_log]
+            x_vals, y_vals = zip(*path_points)
+            ax.plot(x_vals, y_vals, color='skyblue', linewidth=1)
+        ax.set_aspect('equal', adjustable='box')
         plt.axis('off')
         plt.show()
 
@@ -294,25 +299,16 @@ class Environment2D:
         fig, ax = plt.subplots()
         ax.set_xlim(0, self.width)
         ax.set_ylim(0, self.height)
-
-        if self.start:
-            ax.add_patch(plt.Circle(self.start, radius=2, color='green'))
-
-        if self.goal:
-            ax.add_patch(plt.Circle(self.goal, radius=2, color='red'))
-
-        if self.robot:
-            ax.add_patch(plt.Circle(self.robot, radius=2, color='blue'))
-
-        for obs in self.obstacles:
-            obs.draw(ax)
-
-        # Draw robot path
+        for x in range(0, self.width, 1): ax.axvline(x, color='lightgray', linestyle='--', linewidth=0.5)
+        for y in range(0, self.height, 1): ax.axhline(y, color='lightgray', linestyle='--', linewidth=0.5)
+        if self.start: ax.add_patch(plt.Circle(self.start, radius=2, color='green'))
+        if self.goal: ax.add_patch(plt.Circle(self.goal, radius=2, color='red'))
+        if self.robot: ax.add_patch(plt.Circle(self.robot, radius=2, color='blue'))
+        for obs in self.obstacles: obs.draw(ax)
         if len(self.trajectory_log) > 1:
-            points = [step["position"] for step in self.trajectory_log]
-            xs, ys = zip(*points)
-            ax.plot(xs, ys, color='lightblue', linewidth=1.5)
-
+            path_points = [entry['position'] for entry in self.trajectory_log]
+            x_vals, y_vals = zip(*path_points)
+            ax.plot(x_vals, y_vals, color='skyblue', linewidth=1)
         ax.set_aspect('equal', adjustable='box')
         plt.axis('off')
         plt.savefig(filename, bbox_inches='tight', pad_inches=0)
