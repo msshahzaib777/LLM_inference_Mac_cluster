@@ -31,16 +31,23 @@ def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50
         hidden = model(input_ids)
         log_debug(f"[Generate] Computed hidden state: shape={hidden.shape}")
 
-        # Send hidden state to worker (rank 1)
+        # Send hidden state to worker (rank 1) and receive logits back
         half_pass_start_time = time.time()
-        network.send_tensor(hidden, 1)
-        log_debug(f"[Generate] Sent hidden state to rank 1")
-
-        # Receive logits back from rank 1 (use template to know shape/dtype)
-        logits = network.wait_for_tensor(1)
+        
+        # For gRPC backend, send_tensor returns the result directly (more efficient)
+        from config import config as cfg
+        if cfg.get("network_backend") == "grpc":
+            logits = network.send_tensor(hidden, 1, step=step)
+            log_debug(f"[Generate] Sent hidden state and received logits from rank 1 via gRPC")
+        else:
+            # Legacy TCP/MPI behavior
+            network.send_tensor(hidden, 1)
+            log_debug(f"[Generate] Sent hidden state to rank 1")
+            logits = network.wait_for_tensor(1)
+        
         half_pass_time = time.time() - half_pass_start_time
         half_pass_time_list.append(half_pass_time)
-        log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape} in {half_pass_time} seconds")
+        log_debug(f"[Generate] Received logits from rank 1: shape={logits.shape} in {half_pass_time:.4f} seconds")
 
         # Get logits for last token
         logits_last = logits[:, -1, :]
