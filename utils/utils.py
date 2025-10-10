@@ -6,14 +6,22 @@ from config import config as cfg
 
 def log_debug(message, print_msg=False):
     """Append a debug message to the debug log file with timestamp."""
-    DEBUG_LOG_FILE = os.path.abspath(
-        f"./logs/debug_log_rank{cfg.rank}.txt"
-    )
+    try:
+        # Check if we're in a cleanup state where built-ins might not be available
+        if 'open' not in dir(__builtins__) and not hasattr(__builtins__, 'open'):
+            return
+        
+        DEBUG_LOG_FILE = os.path.abspath(
+            f"./logs/debug_log_rank{cfg.rank}.txt"
+        )
 
-    with open(DEBUG_LOG_FILE, "a") as f:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"[{timestamp}] {message}\n")
-        if print_msg: print(message)
+        with open(DEBUG_LOG_FILE, "a") as f:
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"[{timestamp}] {message}\n")
+            if print_msg: print(message)
+    except (NameError, AttributeError, OSError):
+        # Silently ignore errors during cleanup/shutdown
+        pass
 
 
 

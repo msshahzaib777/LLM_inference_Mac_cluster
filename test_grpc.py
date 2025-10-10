@@ -23,7 +23,10 @@ def test_grpc_connection():
     print("🧪 Testing gRPC Connection...")
     
     # Check if we're running as master (rank 0) or worker (rank 1)
-    rank = int(os.environ.get('RANK', 0))
+    rank_env = os.environ.get('RANK', '0')
+    if rank_env == '':
+        rank_env = '0'
+    rank = int(rank_env)
     
     if rank == 0:
         test_master_node()

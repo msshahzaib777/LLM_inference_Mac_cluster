@@ -61,19 +61,31 @@ case $choice in
     3)
         echo -e "${YELLOW}🧪 Testing gRPC Connection${NC}"
         echo ""
-        echo "For Master test: RANK=0 $0 test"
-        echo "For Worker test: RANK=1 $0 test"
+        echo "Choose test mode:"
+        echo "  1) Test as Master Node (requires worker running)"  
+        echo "  2) Test as Worker Node (dummy server)"
         echo ""
         
-        if [ "$2" = "test" ]; then
-            cd "$SCRIPT_DIR"
-            exec $PYTHON_PATH test_grpc.py
-        else
-            read -p "Enter rank (0 for master, 1 for worker): " rank
-            cd "$SCRIPT_DIR"
-            export RANK=$rank
-            exec $PYTHON_PATH test_grpc.py
-        fi
+        read -p "Enter choice (1-2): " test_choice
+        cd "$SCRIPT_DIR"
+        
+        case $test_choice in
+            1)
+                echo "Testing as Master Node..."
+                export RANK=0
+                exec $PYTHON_PATH test_grpc.py
+                ;;
+            2)
+                echo "Testing as Worker Node..."
+                export RANK=1
+                exec $PYTHON_PATH test_grpc.py
+                ;;
+            *)
+                echo "Invalid choice. Defaulting to Master test..."
+                export RANK=0
+                exec $PYTHON_PATH test_grpc.py
+                ;;
+        esac
         ;;
         
     4)
