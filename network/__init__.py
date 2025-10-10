@@ -8,6 +8,8 @@ elif backend == 'mlx_mpi':
     from .mlx_mpi import MLXBackend as Backend
 elif backend == 'tcp':
     from .tcp import TCPBackend as Backend
+elif backend == 'grpc':
+    from .grpc_client import GRPCBackend as Backend
 else:
     raise ValueError(f"Unsupported backend: {backend}")
 

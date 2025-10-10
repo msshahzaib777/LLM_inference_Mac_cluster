@@ -3,6 +3,7 @@ from transformers import AutoTokenizer
 from generate import generate
 from utils.utils import load_model, log_debug, trim_before_last_think
 from worker_inference import main as worker_inference
+from worker_inference_grpc import main as worker_inference_grpc
 from config import config as cfg
 
 print(f"[INFO] Rank: {cfg.rank} / Size: {cfg.size} / Hostname: {os.uname().nodename}")
@@ -49,4 +50,8 @@ if __name__ == "__main__":
     if cfg.rank == 0:
         main()
     if cfg.rank == 1:
-        worker_inference()
+        backend = cfg.get('network_backend')
+        if backend == 'grpc':
+            worker_inference_grpc()
+        else:
+            worker_inference()

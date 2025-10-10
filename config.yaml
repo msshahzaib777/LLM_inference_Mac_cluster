@@ -1,7 +1,13 @@
 model_path: /Users/studentone/Documents/LLM_inference/models/DeepSeek-R1-Distill-Qwen-32B
-network_backend: mpi
+network_backend: grpc
 mpi:
   interface: bridge0
   num_ranks: 2
 tcp:
   port: 5001
+grpc:
+  master_port: 50050
+  worker_port: 50051
+  max_message_size: 104857600  # 100MB
+  keepalive_time_ms: 30000
+  keepalive_timeout_ms: 5000
