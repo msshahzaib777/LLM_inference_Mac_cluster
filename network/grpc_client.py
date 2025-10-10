@@ -74,14 +74,27 @@ class GRPCClient:
         
         try:
             # Convert MLX tensor to numpy for serialization
-            tensor_np = np.array(tensor)
+            # Handle bfloat16 and other MLX-specific dtypes
+            if tensor.dtype == mx.bfloat16:
+                # Convert bfloat16 to float32 for numpy compatibility
+                tensor_converted = tensor.astype(mx.float32)
+                tensor_np = np.array(tensor_converted)
+                original_dtype = "bfloat16"
+            elif tensor.dtype == mx.float16:
+                # Keep float16 but ensure proper conversion
+                tensor_np = np.array(tensor).astype(np.float16)
+                original_dtype = "float16"
+            else:
+                # For other dtypes, convert directly
+                tensor_np = np.array(tensor)
+                original_dtype = str(tensor.dtype).replace('mlx.core.', '')
             
             # Create gRPC request
             request = grpc_service_pb2.TensorRequest(
                 request_id=request_id,
                 step=step,
                 shape=list(tensor_np.shape),
-                dtype=tensor_np.dtype.name,
+                dtype=original_dtype,  # Use original dtype name
                 data=tensor_np.tobytes(),
                 timestamp=int(time.time() * 1000)  # milliseconds
             )
@@ -94,9 +107,26 @@ class GRPCClient:
             
             # Convert response back to MLX tensor
             response_shape = tuple(response.shape)
-            response_dtype = getattr(np, response.dtype)
-            response_np = np.frombuffer(response.data, dtype=response_dtype).reshape(response_shape)
-            result_tensor = mx.array(response_np)
+            
+            # Handle different dtypes properly
+            if response.dtype == "bfloat16":
+                # Response was sent as float32, convert back to bfloat16
+                response_np = np.frombuffer(response.data, dtype=np.float32).reshape(response_shape)
+                result_tensor = mx.array(response_np).astype(mx.bfloat16)
+            elif response.dtype == "float16":
+                response_np = np.frombuffer(response.data, dtype=np.float16).reshape(response_shape)
+                result_tensor = mx.array(response_np).astype(mx.float16)
+            else:
+                # Map dtype string to numpy dtype
+                dtype_mapping = {
+                    'float32': np.float32,
+                    'float64': np.float64,
+                    'int32': np.int32,
+                    'int64': np.int64,
+                }
+                response_dtype = dtype_mapping.get(response.dtype, np.float32)
+                response_np = np.frombuffer(response.data, dtype=response_dtype).reshape(response_shape)
+                result_tensor = mx.array(response_np)
             
             processing_time = time.time() - start_time
             

@@ -5,6 +5,7 @@ from models.qwen2 import Model, ModelArgs
 from config import config as cfg
 
 def log_debug(message, print_msg=False):
+    print(message)
     """Append a debug message to the debug log file with timestamp."""
     try:
         # Check if we're in a cleanup state where built-ins might not be available
