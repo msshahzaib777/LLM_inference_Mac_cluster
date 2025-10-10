@@ -44,6 +44,7 @@ models/
 # Cache directories
 network/__pycache__/
 models/__pycache__/
+<<<<<<< Updated upstream
 
 # Data
 /data/
@@ -11068,3 +11069,8 @@ DeepSeek/lib/python3.12/site-packages/transformers-4.46.3.dist-info/REQUESTED
 DeepSeek/lib/python3.12/site-packages/transformers-4.46.3.dist-info/top_level.txt
 DeepSeek/lib/python3.12/site-packages/transformers-4.46.3.dist-info/WHEEL
 >>>>>>> e171092110de68ed7d9f04653c5ea741113ebb7c
+=======
+__pycache__/
+.idea/
+models/
+>>>>>>> Stashed changes
