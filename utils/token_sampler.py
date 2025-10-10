@@ -1,4 +1,5 @@
 import numpy as np
+import mlx.core as mx
 
 from utils.utils import log_debug
 
@@ -47,7 +48,11 @@ def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
     log_debug(f"[Sampler] Sampling next token with temperature={temperature}, top_k={top_k}, top_p={top_p}")
 
     logits = logits / temperature
-    logits_np = np.array(logits)  # Convert to NumPy array for manipulation
+    # Properly convert MLX array to NumPy array
+    if hasattr(logits, '__array__') or isinstance(logits, mx.array):
+        logits_np = np.asarray(logits, dtype=np.float32)
+    else:
+        logits_np = np.array(logits, dtype=np.float32)
 
     # Top-k filtering: keep top_k highest logits
     if top_k > 0:
