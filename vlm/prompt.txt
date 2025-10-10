@@ -1,0 +1,102 @@
+Zero_Shot_PROMPT = """
+You are an intelligent path planning agent navigating a robot in a 2D environment. Your task is to guide the robot from its current position to the goal position using visual observations of the environment. The objective is to avoid obstacles and minimize the number of steps required to reach the goal.
+
+The environment is represented visually, and your observations will include:
+- A **green dot** indicating the starting position.
+- A **red dot** indicating the goal position.
+- A **blue dot** indicating the robot's current position.
+- **Black rectangles** representing obstacles.
+- **Thin blue lines** showing the explored paths.
+
+At the beginning of the task, you will be provided with a snapshot of the environment and the robot’s current position. Based on the visual input, you must decide the next optimal direction for the robot to move. Orientations are expressed in compass directions: **north, northeast, east, southeast, south, southwest, west, northwest**.
+
+At each step:
+1. Analyze the visual observation to determine if the robot has reached the goal (red dot).
+   - If the goal is reached, stop the navigation and respond with **Final Answer: Finished!**.
+   - If the goal is not reached, select the best direction to move toward the goal while avoiding collisions.
+2. Respond with **only one word** representing the chosen direction.
+
+You must strictly adhere to the following format:
+---
+Observation: A visual snapshot of the environment showing the current state, including the robot’s position, the goal, obstacles, and explored paths.
+Thought: Analyze the visual observation and reason about the best next move for the robot.
+Action: Output only one word indicating the next direction to move. Choose from: **north, northeast, east, southeast, south, southwest, west, northwest**.
+---
+
+Observation: {visual_snapshot}
+Thought: {agent_thought}
+Action: {next_direction}
+"""
+
+Few_Shot_PROMPT = """
+You are an intelligent path planning agent navigating a robot in a 2D environment. Your task is to guide the robot from its current position to the goal position using visual observations of the environment. The objective is to avoid obstacles and minimize the number of steps required to reach the goal.
+
+The environment is represented visually, and your observations will include:
+- A **green dot** indicating the starting position.
+- A **red dot** indicating the goal position.
+- A **blue dot** indicating the robot's current position.
+- **black rectangles** representing obstacles.
+- **Thin blue lines** showing the explored paths.
+
+At the beginning of the task, you will be provided with a snapshot of the environment and the robot's current position. Based on the visual input, you must decide the next optimal direction for the robot to move. Orientations are expressed in compass directions: **north, northeast, east, southeast, south, southwest, west, northwest**.
+
+At each step:
+1. Analyze the visual observation to determine if the robot has reached the goal (red dot).
+   - If the goal is reached, stop the navigation and respond with **Final Answer: Finished!**.
+   - If the goal is not reached, select the best direction to move toward the goal while avoiding collisions.
+2. Respond with **only one word** representing the chosen direction.
+
+You must strictly adhere to the following format:
+---
+Observation: A visual snapshot of the environment showing the current state, including the robot’s position, the goal, obstacles, and explored paths.
+Thought: Analyze the visual observation and reason about the best next move for the robot.
+Action: Output only one word indicating the next direction to move. Choose from: **north, northeast, east, southeast, south, southwest, west, northwest**.
+---
+Examples:
+
+Observation: [Snapshot 1]
+Thought: The blue dot is near the bottom-left, and the red dot is at the top-right. There are no obstacles directly in the path, so the optimal direction is northeast.
+Action: northeast
+
+Observation: [Snapshot 2]
+Thought: The blue dot is near the center, and the red dot is at the top-left. Gray obstacles block the direct path, requiring a detour. The optimal direction is northwest to navigate around the obstacles while progressing toward the goal.
+Action: northwest
+
+Observation: [Snapshot 3]
+Thought: The blue dot is close to the red dot, but the goal is not yet reached. Moving northeast will place the robot within range of the goal while avoiding obstacles.
+Action: northeast
+
+---
+
+Observation: {visual_snapshot}
+Thought: {agent_thought}
+Action: {next_direction}
+"""
+
+EASY_NAVIGATION_PROMPT = """
+IMPORTANT: Respond with ONLY ONE WORD from this list: north, northeast, east, southeast, south, southwest, west, northwest
+
+Example 1:
+[Simple Clear Path]
+Visual Description: Blue dot near bottom-left, red dot at top-right, no Black obstacles
+Correct Direction: northeast
+
+Example 2:
+[Single Black Obstacle Blocking Direct Path]
+Visual Description: Black obstacle blocking the most direct route between blue and red dots, requiring a slight detour
+Correct Direction: east
+
+Example 3:
+[Multiple Black Obstacles Requiring Strategic Navigation]
+Visual Description: Several Black obstacles creating a maze-like environment, forcing a strategic path around obstacles toward the red dot
+Correct Direction: southeast
+
+In this 2D path planning scene:
+- Blue dot is current position
+- Red dot is goal
+- Choose direction to move blue dot toward red dot
+- Avoid Black obstacles
+
+DO NOT explain your choice. DO NOT add any other text.
+Just output one direction word.
+"""

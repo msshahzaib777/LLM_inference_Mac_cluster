@@ -3,7 +3,7 @@ import mlx.core as mx
 import numpy as np
 from network import network
 from utils.utils import log_debug
-from utils.token_sampler import sample_next_token_from_logits as sample_next_token
+from utils.token_sampler import sample_next_token as sample_next_token
 
 
 def generate(prompt, model, tokenizer, max_length=200, temperature=1.0, top_k=50, top_p=0.80):

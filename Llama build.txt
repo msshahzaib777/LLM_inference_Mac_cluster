@@ -1,0 +1,16 @@
+brew install cmake libomp
+
+git clone https://github.com/ggml-org/llama.cpp
+cd llama.cpp
+mkdir build
+cd build
+cmake .. -DGGML_METAL=ON -DGGML_RPC=ON
+cmake --build . --config Release
+
+
+bin/llama-cli -m ../../download/qwq-32b-q4_k_m.gguf  -p "Hello, my name is" --repeat-penalty 1.0 -n 64 --rpc 192.168.2.2:50052, 192.168.2.1:50052 -ngl 99
+
+bin/llama-cli -m ../../download/qwq-32b-q4_k_m.gguf  -p "Hello, my name is" --repeat-penalty 1.0 -n 64 -ngl 99
+
+
+
