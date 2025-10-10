@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package llm_inference;
+
+// Service for distributed LLM inference tensor communication
+service LLMInference {
+    // Process a tensor (hidden state) and return logits
+    rpc ProcessTensor(TensorRequest) returns (TensorResponse);
+    
+    // Process multiple tensors in a stream for better performance
+    rpc ProcessTensorStream(stream TensorRequest) returns (stream TensorResponse);
+    
+    // Health check for worker nodes
+    rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+// Request message containing tensor data
+message TensorRequest {
+    // Unique identifier for this request
+    string request_id = 1;
+    
+    // Generation step number
+    int32 step = 2;
+    
+    // Tensor shape (e.g., [1, seq_len, hidden_size])
+    repeated int32 shape = 3;
+    
+    // Data type (e.g., "float32", "bfloat16", "float16")
+    string dtype = 4;
+    
+    // Serialized tensor data as bytes
+    bytes data = 5;
+    
+    // Optional: compression type used
+    string compression = 6;
+    
+    // Timestamp when request was created
+    int64 timestamp = 7;
+}
+
+// Response message containing processed tensor (logits)
+message TensorResponse {
+    // Request ID this response corresponds to
+    string request_id = 1;
+    
+    // Generation step number
+    int32 step = 2;
+    
+    // Tensor shape (e.g., [1, seq_len, vocab_size])
+    repeated int32 shape = 3;
+    
+    // Data type (e.g., "float32", "bfloat16", "float16")
+    string dtype = 4;
+    
+    // Serialized tensor data as bytes
+    bytes data = 5;
+    
+    // Processing time in milliseconds
+    float processing_time = 6;
+    
+    // Worker node ID that processed this
+    string worker_id = 7;
+    
+    // Success/error status
+    bool success = 8;
+    
+    // Error message if success = false
+    string error_message = 9;
+}
+
+// Health check request
+message HealthRequest {
+    string node_id = 1;
+}
+
+// Health check response
+message HealthResponse {
+    string node_id = 1;
+    string status = 2;  // "healthy", "degraded", "unhealthy"
+    float memory_usage = 3;  // Memory usage percentage
+    float cpu_usage = 4;     // CPU usage percentage
+    int64 uptime = 5;        // Uptime in seconds
+    string model_loaded = 6; // Model status
+}

@@ -1,12 +1,16 @@
 [
     {
-        "ip": "127.0.0.1",
+        "ip": "192.168.2.10",
         "port": 5001,
-        "grpc_port": 50050
+        "grpc_port": 50050,
+        "role": "master",
+        "interface": "bridge0"
     },
     {
-        "ip": "127.0.0.1",
-        "port": 5001,
-        "grpc_port": 50051
+        "ip": "192.168.2.11",
+        "port": 5002,
+        "grpc_port": 50051,
+        "role": "worker",
+        "interface": "bridge0"
     }
 ]
