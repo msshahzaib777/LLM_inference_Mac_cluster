@@ -49,10 +49,18 @@ def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.95):
 
     logits = logits / temperature
     # Properly convert MLX array to NumPy array
-    if hasattr(logits, '__array__') or isinstance(logits, mx.array):
-        logits_np = np.asarray(logits, dtype=np.float32)
-    else:
-        logits_np = np.array(logits, dtype=np.float32)
+    try:
+        # First try direct conversion from MLX to numpy
+        if hasattr(logits, 'dtype') and hasattr(logits, 'shape'):
+            # This is likely an MLX array, convert using MLX methods
+            logits_np = np.array(logits.astype(mx.float32))
+        else:
+            # Fallback for other array types
+            logits_np = np.array(logits, dtype=np.float32)
+    except Exception as e:
+        log_debug(f"[Sampler] Failed to convert logits to numpy: {e}")
+        # Last resort: try converting element by element
+        logits_np = np.array([float(x) for x in logits.tolist()], dtype=np.float32)
 
     # Top-k filtering: keep top_k highest logits
     if top_k > 0:
